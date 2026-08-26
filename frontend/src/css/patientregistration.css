@@ -1,0 +1,237 @@
+/* =========================
+   Patient Registration
+   ========================= */
+
+.patient-registration {
+    width: 100%;
+}
+
+
+/* =========================
+   Page Header
+   ========================= */
+
+.patient-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.patient-page-header h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.patient-page-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================
+   Back Button
+   ========================= */
+
+.back-button {
+    border: 1px solid #dbe1ea;
+    background: #ffffff;
+    color: #374151;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.back-button:hover {
+    background: #f8fafc;
+}
+
+
+/* =========================
+   Form Card
+   ========================= */
+
+.patient-form-card {
+    background: #ffffff;
+    border: 1px solid #eef0f4;
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+}
+
+
+/* =========================
+   Form
+   ========================= */
+
+.patient-form-card form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.patient-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.patient-form-group label {
+    margin-bottom: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.patient-form-group input,
+.patient-form-group select,
+.patient-form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.patient-form-group textarea {
+    resize: vertical;
+}
+
+.patient-form-group input:focus,
+.patient-form-group select:focus,
+.patient-form-group textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.patient-form-group input::placeholder,
+.patient-form-group textarea::placeholder {
+    color: #9ca3af;
+}
+
+
+/* =========================
+   Full Width
+   ========================= */
+
+.patient-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================
+   Error
+   ========================= */
+
+.patient-form-error {
+    grid-column: 1 / -1;
+    padding: 11px 14px;
+    border-radius: 8px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    font-size: 14px;
+}
+
+
+/* =========================
+   Form Actions
+   ========================= */
+
+.patient-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 5px;
+}
+
+.cancel-button,
+.register-button {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.cancel-button {
+    border: 1px solid #d8dde6;
+    background: #ffffff;
+    color: #374151;
+}
+
+.cancel-button:hover {
+    background: #f8fafc;
+}
+
+.register-button {
+    border: none;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.register-button:hover {
+    background: #1d4ed8;
+}
+
+.register-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =========================
+   Mobile
+   ========================= */
+
+@media (max-width: 700px) {
+
+    .patient-page-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .patient-page-header h1 {
+        font-size: 23px;
+    }
+
+    .back-button {
+        width: 100%;
+    }
+
+    .patient-form-card {
+        padding: 18px;
+    }
+
+    .patient-form-card form {
+        grid-template-columns: 1fr;
+    }
+
+    .patient-form-group.full-width {
+        grid-column: auto;
+    }
+
+    .patient-form-actions {
+        grid-column: auto;
+        flex-direction: column-reverse;
+    }
+
+    .cancel-button,
+    .register-button {
+        width: 100%;
+    }
+}

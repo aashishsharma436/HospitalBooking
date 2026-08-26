@@ -1,0 +1,670 @@
+/* =========================================================
+   SARITEC HEALTHCARE
+   LIVE TOKEN DISPLAY
+   TV / FULL SCREEN DESIGN
+   ========================================================= */
+
+.live-token-display {
+    min-height: 100vh;
+    width: 100%;
+    box-sizing: border-box;
+    background: #f4f8fc;
+    display: flex;
+    flex-direction: column;
+    color: #111827;
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.live-token-header {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 24px 50px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.live-token-logo {
+    font-size: 28px;
+    font-weight: 900;
+    color: #2563eb;
+    letter-spacing: -0.8px;
+}
+
+.live-token-live {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 9px 16px;
+
+    border-radius: 25px;
+
+    background: #ecfdf5;
+    color: #047857;
+
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.live-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #10b981;
+
+    animation: livePulse 1.5s infinite;
+}
+
+@keyframes livePulse {
+
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.45;
+        transform: scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.live-token-content {
+    width: 100%;
+    max-width: 1250px;
+
+    margin: auto;
+
+    padding: 42px 30px 50px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+/* =========================================================
+   TITLE / DOCTOR INFORMATION
+   ========================================================= */
+
+.live-token-title {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.live-token-title h1 {
+    margin: 0;
+
+    font-size: clamp(32px, 4vw, 52px);
+
+    font-weight: 900;
+
+    letter-spacing: -1.5px;
+
+    color: #111827;
+}
+
+.live-token-title h2 {
+    margin: 12px 0 0;
+
+    font-size: clamp(24px, 3vw, 38px);
+
+    font-weight: 800;
+
+    color: #2563eb;
+}
+
+.live-token-title p {
+    margin: 8px 0 0;
+
+    color: #6b7280;
+
+    font-size: 16px;
+
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   CURRENT TOKEN CARD
+   ========================================================= */
+
+.current-token-card {
+    width: min(850px, 100%);
+
+    min-height: 430px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 32px;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.09);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 45px;
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+/* Top accent */
+
+.current-token-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 7px;
+
+    background: #2563eb;
+}
+
+
+/* =========================================================
+   NOW SERVING LABEL
+   ========================================================= */
+
+.current-token-label {
+    color: #6b7280;
+
+    font-size: 17px;
+
+    font-weight: 900;
+
+    letter-spacing: 3px;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   CURRENT TOKEN NUMBER
+   ========================================================= */
+
+.current-token-number {
+    margin-top: 18px;
+
+    font-size: clamp(130px, 18vw, 230px);
+
+    line-height: 0.9;
+
+    font-weight: 950;
+
+    color: #2563eb;
+
+    letter-spacing: -8px;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   CURRENT PATIENT
+   ========================================================= */
+
+.current-patient-name {
+    margin-top: 22px;
+
+    font-size: clamp(22px, 3vw, 34px);
+
+    font-weight: 800;
+
+    color: #111827;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   CURRENT DOCTOR
+   ========================================================= */
+
+.current-doctor-name {
+    margin-top: 8px;
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+    color: #6b7280;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   NO CURRENT PATIENT
+   ========================================================= */
+
+.no-current-token {
+    margin-top: 35px;
+
+    font-size: clamp(40px, 6vw, 65px);
+
+    font-weight: 900;
+
+    color: #9ca3af;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.token-loading {
+    margin-top: 30px;
+
+    font-size: 28px;
+
+    font-weight: 600;
+
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.token-error {
+    margin-top: 30px;
+
+    max-width: 600px;
+
+    color: #dc2626;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   NEXT PATIENT CARD
+   ========================================================= */
+
+.next-token-card {
+    width: min(850px, 100%);
+
+    margin-top: 25px;
+
+    box-sizing: border-box;
+
+    padding: 28px 35px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 24px;
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.06);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   NEXT LABEL
+   ========================================================= */
+
+.next-token-card span {
+    display: block;
+
+    color: #6b7280;
+
+    font-size: 13px;
+
+    font-weight: 900;
+
+    letter-spacing: 2px;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   NEXT TOKEN NUMBER
+   ========================================================= */
+
+.next-token-card strong {
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: clamp(40px, 5vw, 62px);
+
+    line-height: 1;
+
+    font-weight: 900;
+
+    color: #111827;
+}
+
+
+/* =========================================================
+   NEXT PATIENT NAME
+   ========================================================= */
+
+.next-patient-name {
+    margin-top: 10px;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    color: #374151;
+}
+
+
+/* =========================================================
+   NEXT DOCTOR
+   ========================================================= */
+
+.next-doctor-name {
+    margin-top: 5px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+.live-token-message {
+    margin-top: 28px;
+
+    width: min(850px, 100%);
+
+    box-sizing: border-box;
+
+    padding: 17px 25px;
+
+    border-radius: 15px;
+
+    background: #eef4ff;
+
+    color: #374151;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    line-height: 1.6;
+
+    text-align: center;
+}
+
+.live-token-message span {
+    margin-right: 8px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.live-token-footer {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 20px;
+
+    text-align: center;
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    background: #ffffff;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+
+/* =========================================================
+   LARGE TV SCREENS
+   ========================================================= */
+
+@media (min-width: 1400px) {
+
+    .live-token-header {
+        padding: 28px 65px;
+    }
+
+    .live-token-logo {
+        font-size: 32px;
+    }
+
+    .live-token-content {
+        padding-top: 55px;
+    }
+
+    .current-token-card {
+        min-height: 500px;
+    }
+
+    .current-token-number {
+        font-size: 250px;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .live-token-header {
+        padding: 20px 30px;
+    }
+
+    .live-token-content {
+        padding: 35px 22px 40px;
+    }
+
+    .current-token-card {
+        min-height: 360px;
+        border-radius: 26px;
+    }
+
+    .current-token-number {
+        font-size: 150px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+    .live-token-header {
+        padding: 17px 18px;
+    }
+
+    .live-token-logo {
+        font-size: 20px;
+    }
+
+    .live-token-live {
+        padding: 7px 11px;
+        font-size: 11px;
+    }
+
+    .live-token-content {
+        padding: 30px 16px 35px;
+    }
+
+    .live-token-title {
+        margin-bottom: 25px;
+    }
+
+    .live-token-title h1 {
+        font-size: 30px;
+    }
+
+    .live-token-title h2 {
+        font-size: 24px;
+    }
+
+    .live-token-title p {
+        font-size: 14px;
+    }
+
+    .current-token-card {
+        min-height: 300px;
+
+        padding: 28px 18px;
+
+        border-radius: 22px;
+    }
+
+    .current-token-label {
+        font-size: 13px;
+
+        letter-spacing: 2px;
+    }
+
+    .current-token-number {
+        font-size: 105px;
+
+        letter-spacing: -5px;
+    }
+
+    .current-patient-name {
+        font-size: 22px;
+    }
+
+    .current-doctor-name {
+        font-size: 14px;
+    }
+
+    .no-current-token {
+        font-size: 40px;
+    }
+
+    .next-token-card {
+        padding: 22px 18px;
+
+        border-radius: 19px;
+    }
+
+    .next-token-card strong {
+        font-size: 42px;
+    }
+
+    .next-patient-name {
+        font-size: 17px;
+    }
+
+    .next-doctor-name {
+        font-size: 14px;
+    }
+
+    .live-token-message {
+        font-size: 14px;
+
+        padding: 15px 18px;
+    }
+
+    .live-token-footer {
+        padding: 16px;
+
+        font-size: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 400px) {
+
+    .live-token-logo {
+        font-size: 17px;
+    }
+
+    .live-token-title h1 {
+        font-size: 26px;
+    }
+
+    .live-token-title h2 {
+        font-size: 21px;
+    }
+
+    .current-token-card {
+        min-height: 270px;
+    }
+
+    .current-token-number {
+        font-size: 90px;
+    }
+
+}

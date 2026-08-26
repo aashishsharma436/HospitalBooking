@@ -1,0 +1,85 @@
+.add-doctor-page {
+
+    min-height: 100vh;
+    background: #f5f7fb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+
+}
+
+
+
+.add-doctor-card {
+
+    width: 500px;
+    background: white;
+    padding: 35px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+
+}
+
+
+
+.add-doctor-card h1 {
+
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1e293b;
+
+}
+
+
+
+.add-doctor-card form {
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+}
+
+
+
+.add-doctor-card input {
+
+    padding: 12px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+
+}
+
+
+
+.add-doctor-card input:focus {
+
+    border-color: #2563eb;
+
+}
+
+
+
+.add-doctor-card button {
+
+    margin-top: 15px;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+
+}
+
+
+
+.add-doctor-card button:hover {
+
+    background: #1d4ed8;
+
+}

@@ -1,0 +1,81 @@
+.doctors{
+    padding:80px 10%;
+    background:#f8fafc;
+    text-align:center;
+}
+
+.doctors h2{
+    font-size:42px;
+    color:#1e293b;
+    margin-bottom:15px;
+}
+
+.doctor-sub{
+    color:#64748b;
+    font-size:18px;
+    margin-bottom:50px;
+}
+
+
+.doctor-container{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:30px;
+}
+
+
+.doctor-card{
+    background:white;
+    padding:35px 25px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+
+.doctor-card:hover{
+    transform:translateY(-8px);
+}
+
+
+.doctor-image{
+    font-size:70px;
+    margin-bottom:20px;
+}
+
+
+.doctor-card h3{
+    color:#2563eb;
+    font-size:22px;
+}
+
+
+.doctor-card p{
+    color:#64748b;
+    margin:10px 0 25px;
+}
+
+
+.doctor-card button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:12px 25px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+
+.doctor-card button:hover{
+    background:#1d4ed8;
+}
+
+
+@media(max-width:900px){
+
+    .doctor-container{
+        grid-template-columns:1fr;
+    }
+
+}

@@ -1,0 +1,61 @@
+.hero{
+    min-height:90vh;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:80px 10%;
+    background:linear-gradient(135deg,#eaf4ff,#ffffff);
+    gap:50px;
+}
+
+.hero-left{
+    flex:1;
+}
+
+.badge{
+    display:inline-block;
+    background:#dbeafe;
+    color:#2563eb;
+    padding:8px 18px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:20px;
+}
+
+.hero-left h1{
+    font-size:55px;
+    color:#1e293b;
+    margin:15px 0;
+}
+
+.hero-left h3{
+    color:#2563eb;
+    font-size:24px;
+}
+
+.hero-left p{
+    color:#64748b;
+    font-size:18px;
+    line-height:1.7;
+    max-width:550px;
+}
+
+.whatsapp-btn{
+    margin-top:25px;
+    background:#25D366;
+    color:white;
+    border:none;
+    padding:15px 30px;
+    border-radius:12px;
+    font-size:17px;
+    cursor:pointer;
+}
+
+.hero-right{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:180px;
+}

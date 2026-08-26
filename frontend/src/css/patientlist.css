@@ -1,0 +1,401 @@
+/* =========================
+   Patient List Page
+   ========================= */
+
+.patient-list-page {
+    width: 100%;
+}
+
+
+/* =========================
+   Header
+   ========================= */
+
+.patient-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.patient-list-header h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.patient-list-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================
+   Add Patient Button
+   ========================= */
+
+.add-patient-btn {
+    border: none;
+    background: #2563eb;
+    color: #ffffff;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.add-patient-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* =========================
+   Toolbar
+   ========================= */
+
+.patient-list-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+
+/* =========================
+   Search
+   ========================= */
+
+.patient-search {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1px solid #dce1e8;
+    border-radius: 9px;
+    padding: 0 14px;
+    box-sizing: border-box;
+}
+
+.patient-search span {
+    font-size: 17px;
+}
+
+.patient-search input {
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 12px 0;
+    font-size: 14px;
+    color: #1f2937;
+    background: transparent;
+}
+
+.patient-search input::placeholder {
+    color: #9ca3af;
+}
+
+
+/* =========================
+   Patient Count
+   ========================= */
+
+.patient-count {
+    white-space: nowrap;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.patient-count strong {
+    color: #1f2937;
+}
+
+
+/* =========================
+   Table Card
+   ========================= */
+
+.patient-table-card {
+    background: #ffffff;
+    border: 1px solid #edf0f4;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================
+   Table Wrapper
+   ========================= */
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+/* =========================
+   Table
+   ========================= */
+
+.patient-table-card table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.patient-table-card thead {
+    background: #f8fafc;
+}
+
+.patient-table-card th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.patient-table-card td {
+    padding: 15px 16px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #eef1f4;
+    vertical-align: middle;
+}
+
+.patient-table-card tbody tr:hover {
+    background: #fafcff;
+}
+
+.patient-table-card tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =========================
+   Patient Name
+   ========================= */
+
+.patient-name {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.patient-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.patient-name div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.patient-name strong {
+    font-size: 14px;
+    color: #1f2937;
+}
+
+.patient-name small {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+
+/* =========================
+   Blood Group
+   ========================= */
+
+.blood-group {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* =========================
+   View Button
+   ========================= */
+
+.view-patient-btn {
+    border: 1px solid #dbe3ef;
+    background: #ffffff;
+    color: #2563eb;
+    padding: 7px 13px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.view-patient-btn:hover {
+    background: #eff6ff;
+}
+
+
+/* =========================
+   Loading
+   ========================= */
+
+.patient-list-message {
+    min-height: 250px;
+    background: #ffffff;
+    border: 1px solid #edf0f4;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+}
+
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: patientSpin 0.8s linear infinite;
+}
+
+@keyframes patientSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================
+   Error
+   ========================= */
+
+.patient-list-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    font-size: 14px;
+}
+
+.patient-list-error button {
+    border: none;
+    background: #dc2626;
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+
+/* =========================
+   Empty State
+   ========================= */
+
+.patient-empty {
+    background: #ffffff;
+    border: 1px solid #edf0f4;
+    border-radius: 12px;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+}
+
+.empty-patient-icon {
+    font-size: 45px;
+    margin-bottom: 12px;
+}
+
+.patient-empty h3 {
+    margin: 0 0 8px;
+    color: #1f2937;
+    font-size: 19px;
+}
+
+.patient-empty p {
+    margin: 0 0 20px;
+    max-width: 450px;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.patient-empty button {
+    border: none;
+    background: #2563eb;
+    color: #ffffff;
+    padding: 11px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 800px) {
+
+    .patient-list-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .add-patient-btn {
+        width: 100%;
+    }
+
+    .patient-list-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .patient-search {
+        max-width: none;
+    }
+
+    .patient-count {
+        text-align: right;
+    }
+}

@@ -1,0 +1,296 @@
+/* =========================
+   Receptionist Management
+   ========================= */
+
+.receptionist-management {
+    width: 100%;
+    padding: 10px;
+}
+
+
+/* =========================
+   Page Header
+   ========================= */
+
+.receptionist-management .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.receptionist-management .page-header h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.receptionist-management .page-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================
+   Form Card
+   ========================= */
+
+.receptionist-form-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    border: 1px solid #eef0f4;
+}
+
+.receptionist-form-card h2 {
+    margin: 0 0 20px;
+    font-size: 20px;
+    color: #1f2937;
+}
+
+
+/* =========================
+   Form
+   ========================= */
+
+.receptionist-form-card form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.receptionist-form-card .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.receptionist-form-card label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 7px;
+    color: #374151;
+}
+
+.receptionist-form-card input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.receptionist-form-card input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.receptionist-form-card input::placeholder {
+    color: #9ca3af;
+}
+
+
+/* =========================
+   Add Button
+   ========================= */
+
+.receptionist-form-card form button {
+    grid-column: 1 / -1;
+    width: fit-content;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.receptionist-form-card form button:hover {
+    background: #1d4ed8;
+}
+
+.receptionist-form-card form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =========================
+   List Card
+   ========================= */
+
+.receptionist-list-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    border: 1px solid #eef0f4;
+}
+
+
+/* =========================
+   List Header
+   ========================= */
+
+.receptionist-list-card .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.receptionist-list-card .list-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #1f2937;
+}
+
+.receptionist-list-card .list-header span {
+    background: #eef4ff;
+    color: #2563eb;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* =========================
+   Table
+   ========================= */
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.receptionist-list-card table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+.receptionist-list-card thead {
+    background: #f8fafc;
+}
+
+.receptionist-list-card th {
+    text-align: left;
+    padding: 14px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.receptionist-list-card td {
+    padding: 15px 12px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.receptionist-list-card tbody tr:hover {
+    background: #fafcff;
+}
+
+
+/* =========================
+   Status
+   ========================= */
+
+.status-active {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #ecfdf3;
+    color: #15803d;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-inactive {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* =========================
+   Deactivate Button
+   ========================= */
+
+.receptionist-list-card td button {
+    padding: 7px 12px;
+    border: none;
+    border-radius: 7px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.receptionist-list-card td button:hover {
+    background: #fecaca;
+}
+
+
+/* =========================
+   Empty / Loading Text
+   ========================= */
+
+.receptionist-list-card > p {
+    margin: 10px 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================
+   Mobile Responsive
+   ========================= */
+
+@media (max-width: 768px) {
+
+    .receptionist-management {
+        padding: 5px;
+    }
+
+    .receptionist-management .page-header h1 {
+        font-size: 23px;
+    }
+
+    .receptionist-form-card,
+    .receptionist-list-card {
+        padding: 18px;
+        border-radius: 10px;
+    }
+
+    .receptionist-form-card form {
+        grid-template-columns: 1fr;
+    }
+
+    .receptionist-form-card form button {
+        width: 100%;
+    }
+
+    .receptionist-list-card .list-header {
+        align-items: flex-start;
+    }
+
+}
