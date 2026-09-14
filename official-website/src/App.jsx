@@ -1,11 +1,72 @@
 import "./App.css";
 
 function App() {
+  const email = "sharmaanshul7773@gmail.com";
+
+  const handleDemo = () => {
+    const subject = encodeURIComponent(
+      "SARITEC Healthcare - Book a Demo"
+    );
+
+    const body = encodeURIComponent(
+      `Hello SARITEC Healthcare,
+
+I would like to book a demo of the SARITEC Healthcare platform.
+
+Name:
+Hospital/Clinic:
+Phone:
+
+Thank you.`
+    );
+
+    window.open(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`,
+      "_blank"
+    );
+  };
+
+  const handleTalk = () => {
+    const subject = encodeURIComponent(
+      "Enquiry for SARITEC Healthcare"
+    );
+
+    const body = encodeURIComponent(
+      `Hello Anshul,
+
+I would like to know more about SARITEC Healthcare and its solutions.
+
+Name:
+Hospital/Clinic:
+Phone:
+
+Thank you.`
+    );
+
+    window.open(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`,
+      "_blank"
+    );
+  };
+
+  const handleGetStarted = () => {
+    document.getElementById("contact")?.scrollIntoView({
+      behavior: "smooth",
+    });
+  };
+
+  const handleExplore = () => {
+    document.getElementById("features")?.scrollIntoView({
+      behavior: "smooth",
+    });
+  };
+
   return (
     <div className="app">
 
       {/* NAVBAR */}
       <nav className="navbar">
+
         <div className="logo">
           SARITEC <span>Healthcare</span>
         </div>
@@ -18,9 +79,13 @@ function App() {
           <a href="#contact">Contact</a>
         </div>
 
-        <button className="nav-button">
+        <button
+          className="nav-button"
+          onClick={handleGetStarted}
+        >
           Get Started
         </button>
+
       </nav>
 
 
@@ -50,13 +115,21 @@ function App() {
           </p>
 
           <div className="hero-buttons">
-            <button className="primary-btn">
+
+            <button
+              className="primary-btn"
+              onClick={handleDemo}
+            >
               Book a Demo
             </button>
 
-            <button className="secondary-btn">
+            <button
+              className="secondary-btn"
+              onClick={handleExplore}
+            >
               Explore Solutions →
             </button>
+
           </div>
 
         </div>
@@ -66,10 +139,12 @@ function App() {
         <div className="founder-hero">
 
           <div className="founder-photo-placeholder">
+
             <img
               src="/founder.jpg"
               alt="Founder & CEO"
             />
+
           </div>
 
           <div className="founder-info">
@@ -132,11 +207,15 @@ function App() {
           <div className="product-header">
 
             <div>
-              <small>SARITEC Healthcare</small>
+
+              <small>
+                SARITEC Healthcare
+              </small>
 
               <h3>
                 Smart Hospital Dashboard
               </h3>
+
             </div>
 
             <div className="status-dot">
@@ -167,11 +246,15 @@ function App() {
 
 
           <div className="dashboard-main">
-            <span>Patient Experience</span>
+
+            <span>
+              Patient Experience
+            </span>
 
             <strong>
               Smarter. Simpler. Faster.
             </strong>
+
           </div>
 
 
@@ -367,7 +450,7 @@ function App() {
       </section>
 
 
-      {/* CTA */}
+      {/* CTA / CONTACT */}
       <section className="cta-section" id="contact">
 
         <div>
@@ -384,9 +467,23 @@ function App() {
             Let's build a better patient experience together.
           </p>
 
+          <p>
+            Email us at{" "}
+            <a
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=${email}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {email}
+            </a>
+          </p>
+
         </div>
 
-        <button className="primary-btn">
+        <button
+          className="primary-btn"
+          onClick={handleTalk}
+        >
           Talk to SARITEC
         </button>
 
@@ -406,10 +503,20 @@ function App() {
             Smart Management System
           </p>
 
+          <p>
+            <a
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=${email}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {email}
+            </a>
+          </p>
+
         </div>
 
         <div className="footer-right">
-          © 2026 SARITEC Healthcare. All rights reserved.
+          ©️ 2026 SARITEC Healthcare. All rights reserved.
         </div>
 
       </footer>
