@@ -3,12 +3,39 @@ import "./App.css";
 function App() {
   const email = "sharmaanshul7773@gmail.com";
 
-  const handleDemo = () => {
-    const subject = encodeURIComponent(
-      "SARITEC Healthcare - Book a Demo"
+  // GMAIL HANDLER
+  const openEmail = (subjectText, bodyText) => {
+    const subject = encodeURIComponent(subjectText);
+    const body = encodeURIComponent(bodyText);
+
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(
+      navigator.userAgent
     );
 
-    const body = encodeURIComponent(
+    if (isMobile) {
+      // Mobile: try Gmail app first
+      window.location.href =
+        `googlegmail://co?to=${email}&subject=${subject}&body=${body}`;
+
+      // Fallback to Gmail web
+      setTimeout(() => {
+        window.open(
+          `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`,
+          "_blank"
+        );
+      }, 1200);
+    } else {
+      // Laptop/Desktop: Gmail Compose
+      window.open(
+        `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`,
+        "_blank"
+      );
+    }
+  };
+
+  const handleDemo = () => {
+    openEmail(
+      "SARITEC Healthcare - Book a Demo",
       `Hello SARITEC Healthcare,
 
 I would like to book a demo of the SARITEC Healthcare platform.
@@ -19,19 +46,11 @@ Phone:
 
 Thank you.`
     );
-
-    window.open(
-      `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`,
-      "_blank"
-    );
   };
 
   const handleTalk = () => {
-    const subject = encodeURIComponent(
-      "Enquiry for SARITEC Healthcare"
-    );
-
-    const body = encodeURIComponent(
+    openEmail(
+      "Enquiry for SARITEC Healthcare",
       `Hello Anshul,
 
 I would like to know more about SARITEC Healthcare and its solutions.
@@ -41,11 +60,6 @@ Hospital/Clinic:
 Phone:
 
 Thank you.`
-    );
-
-    window.open(
-      `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`,
-      "_blank"
     );
   };
 
