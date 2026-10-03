@@ -23,6 +23,12 @@ public class PlatformAdminController {
   long count=Optional.ofNullable(jdbc.queryForObject("select count(*) from platform_tenants where lower(tenant_slug)=lower(?)",Long.class,normalized)).orElse(0L);
   return Map.of("slug",normalized,"domain",normalized+".careflow.com","available",count==0);
  }
+ @GetMapping("/tenants/contact-availability") public Map<String,Object> contactAvailability(@RequestParam(required=false) String email,@RequestParam(required=false) String phone){
+  long emailCount=(email==null||email.isBlank())?0L:Optional.ofNullable(jdbc.queryForObject("select count(*) from platform_tenants where lower(email)=lower(?)",Long.class,email.trim())).orElse(0L);
+  String normalizedPhone=phone==null?null:phone.replaceAll("[^0-9+]","");
+  long phoneCount=(normalizedPhone==null||normalizedPhone.isBlank())?0L:Optional.ofNullable(jdbc.queryForObject("select count(*) from platform_tenants where phone=?",Long.class,normalizedPhone)).orElse(0L);
+  return Map.of("emailAvailable",emailCount==0,"phoneAvailable",phoneCount==0);
+ }
  @PostMapping("/tenants") public Map<String,Object> onboard(@RequestBody Tenant request,Authentication auth){
   request.setStatus(HospitalStatus.PENDING_REVIEW);request.setOnboardingStatus(HospitalStatus.PENDING_REVIEW);
   if(request.getTenantSlug()==null||request.getTenantSlug().isBlank())throw new IllegalArgumentException("CareFlow domain prefix is required");
@@ -31,6 +37,12 @@ public class PlatformAdminController {
   if(existingSlug!=null&&existingSlug>0)
    throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"CareFlow domain \""+request.getTenantSlug()+".careflow.com\" already exists. Please choose another domain prefix.");
   request.setTenantDomain(request.getTenantSlug()+".careflow.com");
+  String normalizedPhone=request.getPhone()==null?null:request.getPhone().replaceAll("[^0-9+]","");
+  request.setPhone(normalizedPhone);
+  Long existingEmail=jdbc.queryForObject("select count(*) from platform_tenants where lower(email)=lower(?)",Long.class,request.getEmail().trim());
+  Long existingPhone=jdbc.queryForObject("select count(*) from platform_tenants where phone=?",Long.class,normalizedPhone);
+  if(existingEmail!=null&&existingEmail>0) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"This contact email is already registered. Please use another email.");
+  if(existingPhone!=null&&existingPhone>0) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"This mobile number is already registered. Please use another number.");
   if(request.getAdminEmail()==null||request.getAdminEmail().isBlank())request.setAdminEmail("admin@"+request.getTenantDomain());
   if(request.getEmail()==null||request.getEmail().isBlank())throw new IllegalArgumentException("Verified contact email is required");
   if(request.getPhone()==null||request.getPhone().isBlank())throw new IllegalArgumentException("Mobile number is required");
