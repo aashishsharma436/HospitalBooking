@@ -19,7 +19,7 @@ import java.util.List;
 public class SecurityConfig {
  @Bean PasswordEncoder passwordEncoder(){return PasswordEncoderFactories.createDelegatingPasswordEncoder();}
  @Bean org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder(com.hospitalbooking.auth.JwtTokenService service){return service.decoder();}
- @Bean UserDetailsService platformUsers(@Value("\${PLATFORM_ADMIN_USERNAME:superadmin}") String username,@Value("\${PLATFORM_ADMIN_PASSWORD:change-me}") String password){
+ @Bean UserDetailsService platformUsers(@Value("${PLATFORM_ADMIN_USERNAME:superadmin}") String username,@Value("${PLATFORM_ADMIN_PASSWORD:change-me}") String password){
   return new InMemoryUserDetailsManager(User.withUsername(username).password(passwordEncoder().encode(password)).roles("PLATFORM_ADMIN").build());
  }
  @Bean AuthenticationProvider platformAuthenticationProvider(UserDetailsService platformUsers,PasswordEncoder encoder){var provider=new DaoAuthenticationProvider(platformUsers);provider.setPasswordEncoder(encoder);return provider;}
