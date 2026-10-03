@@ -77,10 +77,29 @@ function Stat({ label, value, delta, tone }) {
 }
 
 function App(){
+ const [route,setRoute]=useState(()=>window.location.pathname);
  const [authenticated,setAuthenticated]=useState(()=>!!sessionStorage.getItem('hospitalAccessToken'));
- if(window.location.pathname.startsWith('/super-admin')) return <SuperAdmin />;
- if(!authenticated) return <HospitalLogin onLogin={()=>setAuthenticated(true)} />;
- return <HospitalDashboard onLogout={()=>{sessionStorage.removeItem('hospitalAccessToken');sessionStorage.removeItem('hospitalUser');setAuthenticated(false);}} />;
+
+ useEffect(()=>{
+   const onPopState=()=>setRoute(window.location.pathname);
+   window.addEventListener('popstate',onPopState);
+   return ()=>window.removeEventListener('popstate',onPopState);
+ },[]);
+
+ if(route.startsWith('/super-admin')) return <SuperAdmin />;
+
+ if(!authenticated) {
+   return <HospitalLogin onLogin={()=>setAuthenticated(true)} onOpenSuperAdmin={()=>{
+     window.history.pushState({},'', '/super-admin');
+     setRoute('/super-admin');
+   }} />;
+ }
+
+ return <HospitalDashboard onLogout={()=>{
+   sessionStorage.removeItem('hospitalAccessToken');
+   sessionStorage.removeItem('hospitalUser');
+   setAuthenticated(false);
+ }} />;
 }
 
 export default App;
