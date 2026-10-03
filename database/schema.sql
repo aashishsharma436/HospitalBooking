@@ -1,4 +1,5 @@
--- HospitalBooking SaaS — PostgreSQL schema v1
+-- HospitalBooking SaaS — PostgreSQL schema v2
+-- Doctor-practice architecture: APPOINTMENT / QUEUE / HYBRID
 -- Purpose: reviewable foundation for the new Spring Boot implementation.
 -- This is intentionally standalone DDL; application code and migrations come later.
 
@@ -18,7 +19,8 @@ CREATE TYPE appointment_status AS ENUM (
     'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW'
 );
 CREATE TYPE booking_source AS ENUM ('WEBSITE', 'RECEPTION', 'PHONE', 'WHATSAPP', 'ADMIN', 'API');
-CREATE TYPE slot_status AS ENUM ('AVAILABLE', 'HELD', 'BOOKED', 'BLOCKED');
+CREATE TYPE consultation_mode AS ENUM ('APPOINTMENT', 'QUEUE', 'HYBRID');
+CREATE TYPE queue_ticket_source AS ENUM ('APPOINTMENT', 'WALK_IN', 'RECEPTION', 'ONLINE');
 CREATE TYPE queue_status AS ENUM ('WAITING', 'CALLED', 'SERVING', 'COMPLETED', 'SKIPPED', 'NO_SHOW');
 CREATE TYPE schedule_exception_type AS ENUM ('LEAVE', 'HOLIDAY', 'BLOCKED', 'SPECIAL_HOURS');
 CREATE TYPE payment_status AS ENUM (
@@ -282,25 +284,16 @@ CREATE TABLE services (
     CONSTRAINT uq_services_tenant_id UNIQUE (tenant_id, id)
 );
 
-CREATE TABLE doctor_services (
+CREATE TABLE doctor_practice_services (
     tenant_id           uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    doctor_id           uuid NOT NULL,
+    doctor_practice_id  uuid NOT NULL,
     service_id          uuid NOT NULL,
     price               numeric(12,2) NOT NULL DEFAULT 0 CHECK (price >= 0),
     currency            char(3) NOT NULL DEFAULT 'INR',
     duration_minutes    integer CHECK (duration_minutes > 0),
     status              record_status NOT NULL DEFAULT 'ACTIVE',
-    PRIMARY KEY (doctor_id, service_id),
-    CONSTRAINT fk_doctor_services_doctor
-        FOREIGN KEY (tenant_id, doctor_id)
-        REFERENCES doctors(tenant_id, id)
-        ON DELETE CASCADE,
-    CONSTRAINT fk_doctor_services_service
-        FOREIGN KEY (tenant_id, service_id)
-        REFERENCES services(tenant_id, id)
-        ON DELETE CASCADE
+    PRIMARY KEY (doctor_practice_id, service_id)
 );
-
 -- ============================================================
 -- PATIENTS
 -- ============================================================
@@ -331,18 +324,61 @@ CREATE TABLE patients (
 );
 
 -- ============================================================
--- SCHEDULING
+-- DOCTOR PRACTICES / SCHEDULING
 -- ============================================================
+
+CREATE TABLE doctor_practices (
+    id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id           uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    hospital_id         uuid NOT NULL,
+    doctor_id           uuid NOT NULL,
+    consultation_mode   consultation_mode NOT NULL DEFAULT 'APPOINTMENT',
+    queue_enabled       boolean NOT NULL DEFAULT false,
+    online_booking_enabled boolean NOT NULL DEFAULT true,
+    status              record_status NOT NULL DEFAULT 'ACTIVE',
+    created_at          timestamptz NOT NULL DEFAULT now(),
+    updated_at          timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT fk_doctor_practices_hospital
+        FOREIGN KEY (tenant_id, hospital_id)
+        REFERENCES hospitals(tenant_id, id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_doctor_practices_doctor
+        FOREIGN KEY (tenant_id, doctor_id)
+        REFERENCES doctors(tenant_id, id)
+        ON DELETE CASCADE,
+    CONSTRAINT uq_doctor_practice
+        UNIQUE (tenant_id, hospital_id, doctor_id),
+    CONSTRAINT uq_doctor_practices_tenant_id
+        UNIQUE (tenant_id, id),
+    CONSTRAINT ck_doctor_practice_queue_mode
+        CHECK (
+            (consultation_mode IN ('QUEUE','HYBRID') AND queue_enabled = true)
+            OR
+            (consultation_mode = 'APPOINTMENT' AND queue_enabled = false)
+        )
+);
+
+ALTER TABLE doctor_practice_services
+    ADD CONSTRAINT fk_doctor_practice_services_practice
+    FOREIGN KEY (tenant_id, doctor_practice_id)
+    REFERENCES doctor_practices(tenant_id, id)
+    ON DELETE CASCADE;
+
+ALTER TABLE doctor_practice_services
+    ADD CONSTRAINT fk_doctor_practice_services_service
+    FOREIGN KEY (tenant_id, service_id)
+    REFERENCES services(tenant_id, id)
+    ON DELETE RESTRICT;
 
 CREATE TABLE doctor_schedules (
     id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id           uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     hospital_id         uuid NOT NULL,
-    doctor_id           uuid NOT NULL,
+    doctor_practice_id  uuid NOT NULL,
     day_of_week         smallint NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
     start_time          time NOT NULL,
     end_time            time NOT NULL,
-    slot_duration_minutes integer NOT NULL DEFAULT 15 CHECK (slot_duration_minutes > 0),
+    appointment_duration_minutes integer NOT NULL DEFAULT 15 CHECK (appointment_duration_minutes > 0),
     status              record_status NOT NULL DEFAULT 'ACTIVE',
     created_at          timestamptz NOT NULL DEFAULT now(),
     updated_at          timestamptz NOT NULL DEFAULT now(),
@@ -350,20 +386,20 @@ CREATE TABLE doctor_schedules (
         FOREIGN KEY (tenant_id, hospital_id)
         REFERENCES hospitals(tenant_id, id)
         ON DELETE CASCADE,
-    CONSTRAINT fk_schedules_doctor
-        FOREIGN KEY (tenant_id, doctor_id)
-        REFERENCES doctors(tenant_id, id)
+    CONSTRAINT fk_schedules_practice
+        FOREIGN KEY (tenant_id, doctor_practice_id)
+        REFERENCES doctor_practices(tenant_id, id)
         ON DELETE CASCADE,
     CONSTRAINT ck_schedules_time CHECK (start_time < end_time),
-    CONSTRAINT uq_doctor_schedule_interval
-        UNIQUE (doctor_id, day_of_week, start_time, end_time)
+    CONSTRAINT uq_practice_schedule_interval
+        UNIQUE (doctor_practice_id, day_of_week, start_time, end_time)
 );
 
 CREATE TABLE doctor_schedule_exceptions (
     id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id           uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     hospital_id         uuid NOT NULL,
-    doctor_id           uuid NOT NULL,
+    doctor_practice_id  uuid NOT NULL,
     exception_date      date NOT NULL,
     start_time          time,
     end_time            time,
@@ -374,9 +410,9 @@ CREATE TABLE doctor_schedule_exceptions (
         FOREIGN KEY (tenant_id, hospital_id)
         REFERENCES hospitals(tenant_id, id)
         ON DELETE CASCADE,
-    CONSTRAINT fk_schedule_exceptions_doctor
-        FOREIGN KEY (tenant_id, doctor_id)
-        REFERENCES doctors(tenant_id, id)
+    CONSTRAINT fk_schedule_exceptions_practice
+        FOREIGN KEY (tenant_id, doctor_practice_id)
+        REFERENCES doctor_practices(tenant_id, id)
         ON DELETE CASCADE,
     CONSTRAINT ck_schedule_exception_time
         CHECK (
@@ -385,36 +421,9 @@ CREATE TABLE doctor_schedule_exceptions (
         )
 );
 
--- Generated availability can be materialized here when needed.
-CREATE TABLE appointment_slots (
-    id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id           uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    hospital_id         uuid NOT NULL,
-    doctor_id           uuid NOT NULL,
-    service_id          uuid NOT NULL,
-    slot_date           date NOT NULL,
-    start_time          time NOT NULL,
-    end_time            time NOT NULL,
-    status              slot_status NOT NULL DEFAULT 'AVAILABLE',
-    appointment_id      uuid,
-    held_until          timestamptz,
-    created_at          timestamptz NOT NULL DEFAULT now(),
-    updated_at          timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT fk_slots_hospital
-        FOREIGN KEY (tenant_id, hospital_id)
-        REFERENCES hospitals(tenant_id, id)
-        ON DELETE CASCADE,
-    CONSTRAINT fk_slots_doctor
-        FOREIGN KEY (tenant_id, doctor_id)
-        REFERENCES doctors(tenant_id, id)
-        ON DELETE CASCADE,
-    CONSTRAINT fk_slots_service
-        FOREIGN KEY (tenant_id, service_id)
-        REFERENCES services(tenant_id, id)
-        ON DELETE RESTRICT,
-    CONSTRAINT ck_slots_time CHECK (start_time < end_time),
-    CONSTRAINT uq_doctor_slot UNIQUE (doctor_id, slot_date, start_time)
-);
+-- Availability is calculated dynamically from practice schedules,
+-- date exceptions, service duration, and existing appointments.
+-- We intentionally do not persist generated appointment slots.
 
 -- ============================================================
 -- APPOINTMENTS
@@ -424,16 +433,17 @@ CREATE TABLE appointments (
     id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id           uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     hospital_id         uuid NOT NULL,
+    doctor_practice_id  uuid NOT NULL,
     patient_id          uuid NOT NULL,
-    doctor_id           uuid NOT NULL,
     service_id          uuid NOT NULL,
-    slot_id             uuid,
     appointment_number  varchar(60) NOT NULL,
     appointment_date    date NOT NULL,
     appointment_start   time NOT NULL,
     appointment_end     time NOT NULL,
     status              appointment_status NOT NULL DEFAULT 'CONFIRMED',
     booking_source      booking_source NOT NULL,
+    checked_in_at       timestamptz,
+    checked_in_by       uuid,
     notes               text,
     created_at          timestamptz NOT NULL DEFAULT now(),
     updated_at          timestamptz NOT NULL DEFAULT now(),
@@ -441,39 +451,26 @@ CREATE TABLE appointments (
         FOREIGN KEY (tenant_id, hospital_id)
         REFERENCES hospitals(tenant_id, id)
         ON DELETE CASCADE,
+    CONSTRAINT fk_appointments_practice
+        FOREIGN KEY (tenant_id, doctor_practice_id)
+        REFERENCES doctor_practices(tenant_id, id)
+        ON DELETE RESTRICT,
     CONSTRAINT fk_appointments_patient
         FOREIGN KEY (tenant_id, patient_id)
         REFERENCES patients(tenant_id, id)
-        ON DELETE RESTRICT,
-    CONSTRAINT fk_appointments_doctor
-        FOREIGN KEY (tenant_id, doctor_id)
-        REFERENCES doctors(tenant_id, id)
         ON DELETE RESTRICT,
     CONSTRAINT fk_appointments_service
         FOREIGN KEY (tenant_id, service_id)
         REFERENCES services(tenant_id, id)
         ON DELETE RESTRICT,
+    CONSTRAINT fk_appointments_checked_in_by
+        FOREIGN KEY (tenant_id, checked_in_by)
+        REFERENCES users(tenant_id, id)
+        ON DELETE SET NULL,
     CONSTRAINT ck_appointments_time CHECK (appointment_start < appointment_end),
     CONSTRAINT uq_appointment_number UNIQUE (tenant_id, appointment_number),
     CONSTRAINT uq_appointment_id_tenant UNIQUE (tenant_id, id)
 );
-
-ALTER TABLE appointment_slots
-    ADD CONSTRAINT fk_slots_appointment
-    FOREIGN KEY (tenant_id, appointment_id)
-    REFERENCES appointments(tenant_id, id)
-    ON DELETE SET NULL;
-
-ALTER TABLE appointments
-    ADD CONSTRAINT fk_appointments_slot
-    FOREIGN KEY (slot_id)
-    REFERENCES appointment_slots(id)
-    ON DELETE SET NULL;
-
--- Only one active appointment can own a slot.
-CREATE UNIQUE INDEX ux_appointment_slots_active_booking
-    ON appointment_slots (id)
-    WHERE status IN ('HELD', 'BOOKED');
 
 -- ============================================================
 -- QUEUE
@@ -483,28 +480,30 @@ CREATE TABLE queue_counters (
     id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id           uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     hospital_id         uuid NOT NULL,
-    doctor_id           uuid NOT NULL,
+    doctor_practice_id  uuid NOT NULL,
     queue_date          date NOT NULL,
     next_number         integer NOT NULL DEFAULT 1 CHECK (next_number > 0),
     CONSTRAINT fk_queue_counters_hospital
         FOREIGN KEY (tenant_id, hospital_id)
         REFERENCES hospitals(tenant_id, id)
         ON DELETE CASCADE,
-    CONSTRAINT fk_queue_counters_doctor
-        FOREIGN KEY (tenant_id, doctor_id)
-        REFERENCES doctors(tenant_id, id)
+    CONSTRAINT fk_queue_counters_practice
+        FOREIGN KEY (tenant_id, doctor_practice_id)
+        REFERENCES doctor_practices(tenant_id, id)
         ON DELETE CASCADE,
-    CONSTRAINT uq_queue_counter UNIQUE (doctor_id, queue_date)
+    CONSTRAINT uq_queue_counter UNIQUE (doctor_practice_id, queue_date)
 );
 
 CREATE TABLE queue_tickets (
     id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id           uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     hospital_id         uuid NOT NULL,
-    doctor_id           uuid NOT NULL,
+    doctor_practice_id  uuid NOT NULL,
+    patient_id          uuid NOT NULL,
     appointment_id      uuid,
     queue_date          date NOT NULL,
     token_number        integer NOT NULL CHECK (token_number > 0),
+    source              queue_ticket_source NOT NULL,
     status              queue_status NOT NULL DEFAULT 'WAITING',
     called_at           timestamptz,
     served_at           timestamptz,
@@ -514,15 +513,19 @@ CREATE TABLE queue_tickets (
         FOREIGN KEY (tenant_id, hospital_id)
         REFERENCES hospitals(tenant_id, id)
         ON DELETE CASCADE,
-    CONSTRAINT fk_queue_tickets_doctor
-        FOREIGN KEY (tenant_id, doctor_id)
-        REFERENCES doctors(tenant_id, id)
+    CONSTRAINT fk_queue_tickets_practice
+        FOREIGN KEY (tenant_id, doctor_practice_id)
+        REFERENCES doctor_practices(tenant_id, id)
         ON DELETE CASCADE,
+    CONSTRAINT fk_queue_tickets_patient
+        FOREIGN KEY (tenant_id, patient_id)
+        REFERENCES patients(tenant_id, id)
+        ON DELETE RESTRICT,
     CONSTRAINT fk_queue_tickets_appointment
         FOREIGN KEY (tenant_id, appointment_id)
         REFERENCES appointments(tenant_id, id)
         ON DELETE SET NULL,
-    CONSTRAINT uq_queue_token UNIQUE (doctor_id, queue_date, token_number)
+    CONSTRAINT uq_queue_token UNIQUE (doctor_practice_id, queue_date, token_number)
 );
 
 -- ============================================================
@@ -651,27 +654,30 @@ CREATE INDEX ix_services_tenant_hospital ON services (tenant_id, hospital_id);
 CREATE INDEX ix_patients_tenant_hospital ON patients (tenant_id, hospital_id);
 CREATE INDEX ix_patients_phone ON patients (tenant_id, phone);
 
-CREATE INDEX ix_doctor_schedules_doctor_day
-    ON doctor_schedules (doctor_id, day_of_week);
-CREATE INDEX ix_schedule_exceptions_doctor_date
-    ON doctor_schedule_exceptions (doctor_id, exception_date);
+CREATE INDEX ix_doctor_practices_tenant_hospital
+    ON doctor_practices (tenant_id, hospital_id);
+CREATE INDEX ix_doctor_practices_doctor
+    ON doctor_practices (doctor_id);
 
-CREATE INDEX ix_slots_doctor_date
-    ON appointment_slots (doctor_id, slot_date, start_time);
-CREATE INDEX ix_slots_status_date
-    ON appointment_slots (tenant_id, slot_date, status);
+CREATE INDEX ix_doctor_practice_services_service
+    ON doctor_practice_services (service_id);
+
+CREATE INDEX ix_doctor_schedules_practice_day
+    ON doctor_schedules (doctor_practice_id, day_of_week);
+CREATE INDEX ix_schedule_exceptions_practice_date
+    ON doctor_schedule_exceptions (doctor_practice_id, exception_date);
 
 CREATE INDEX ix_appointments_tenant_date
     ON appointments (tenant_id, appointment_date);
-CREATE INDEX ix_appointments_doctor_date
-    ON appointments (doctor_id, appointment_date, appointment_start);
+CREATE INDEX ix_appointments_practice_date
+    ON appointments (doctor_practice_id, appointment_date, appointment_start);
 CREATE INDEX ix_appointments_patient
     ON appointments (patient_id, appointment_date);
 CREATE INDEX ix_appointments_status
     ON appointments (tenant_id, status);
 
-CREATE INDEX ix_queue_tickets_doctor_date_status
-    ON queue_tickets (doctor_id, queue_date, status, token_number);
+CREATE INDEX ix_queue_tickets_practice_date_status
+    ON queue_tickets (doctor_practice_id, queue_date, status, token_number);
 
 CREATE INDEX ix_payments_tenant_status
     ON payments (tenant_id, status);
@@ -720,11 +726,11 @@ BEFORE UPDATE ON services FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_patients_updated_at
 BEFORE UPDATE ON patients FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+CREATE TRIGGER trg_doctor_practices_updated_at
+BEFORE UPDATE ON doctor_practices FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 CREATE TRIGGER trg_doctor_schedules_updated_at
 BEFORE UPDATE ON doctor_schedules FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER trg_appointment_slots_updated_at
-BEFORE UPDATE ON appointment_slots FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TRIGGER trg_appointments_updated_at
 BEFORE UPDATE ON appointments FOR EACH ROW EXECUTE FUNCTION set_updated_at();
@@ -771,12 +777,16 @@ ON CONFLICT (key) DO NOTHING;
 --      SELECT ... FROM queue_counters WHERE doctor_id = ? AND queue_date = ? FOR UPDATE;
 --      read next_number; increment; insert queue_tickets; COMMIT.
 --
--- 2. Booking MUST lock the selected appointment_slots row:
---      SELECT ... FROM appointment_slots WHERE id = ? FOR UPDATE;
---      verify AVAILABLE/valid HELD state; change to BOOKED; create appointment; COMMIT.
+-- 2. Appointment booking MUST be transactional. The service should:
+--      calculate availability from schedules/exceptions/current appointments;
+--      lock the relevant practice/date or use an equivalent serialization strategy;
+--      re-check overlap immediately before insert; create appointment; COMMIT.
 --
--- 3. Payment webhooks MUST be idempotent using provider_event_id.
+-- 3. Appointment-based patients enter the queue only after check-in.
+--    Queue-based patients create a queue ticket directly from walk-in registration.
 --
--- 4. Tenant isolation is enforced by composite (tenant_id, foreign_id) keys
+-- 4. Payment webhooks MUST be idempotent using provider_event_id.
+--
+-- 5. Tenant isolation is enforced by composite (tenant_id, foreign_id) keys
 --    on tenant-owned relationships. Application authorization must still
 --    derive tenant_id from the authenticated principal, never from request input.
