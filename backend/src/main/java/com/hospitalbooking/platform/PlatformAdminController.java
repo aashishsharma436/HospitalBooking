@@ -19,7 +19,7 @@ public class PlatformAdminController {
  }
  @PostMapping("/tenants") public Map<String,Object> onboard(@RequestBody Tenant request,Authentication auth){
   request.setStatus(HospitalStatus.PENDING_REVIEW);request.setOnboardingStatus(HospitalStatus.PENDING_REVIEW);
-  if(request.getTenantSlug()==null||request.getTenantSlug().isBlank())request.setTenantSlug(slugify(request.getHospitalName()));
+  if(request.getTenantSlug()==null||request.getTenantSlug().isBlank())request.setTenantSlug(uniqueTenantSlug(request.getHospitalName()));
   request.setTenantDomain(request.getTenantSlug()+".careflow.com");
   if(request.getAdminEmail()==null||request.getAdminEmail().isBlank())request.setAdminEmail("admin@"+request.getTenantDomain());
   if(request.getEmail()==null||request.getEmail().isBlank())throw new IllegalArgumentException("Verified contact email is required");
@@ -80,6 +80,17 @@ public class PlatformAdminController {
  private void audit(Authentication auth,String action,String entityType,UUID entityId,Map<String,Object> metadata){
   String actor=auth==null?"system":auth.getName();
   jdbc.update("insert into audit_logs(action,entity_type,entity_id,metadata) values(?,?,?,?::jsonb)",action,entityType,entityId,new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(Map.of("actor",actor,"source","platform")).toString());
+ }
+ private String uniqueTenantSlug(String hospitalName){
+  String base=slugify(hospitalName);
+  if(base.isBlank()) base="hospital";
+  String slug=base;
+  for(int i=1;i<=100;i++){
+   Long n=jdbc.queryForObject("select count(*) from platform_tenants where tenant_slug=?",Long.class,slug);
+   if(n==null||n==0) return slug;
+   slug=base+"-"+(i+1);
+  }
+  throw new IllegalStateException("Unable to generate a unique hospital domain");
  }
  private String generateHospitalCode(){
   for(int i=0;i<20;i++){
