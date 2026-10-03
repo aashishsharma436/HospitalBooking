@@ -9,10 +9,28 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: DATABASE_URL
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
+      - key: DATABASE_HOST
         fromDatabase:
           name: hospital-booking-db
-          property: connectionString
+          property: host
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: hospital-booking-db
+          property: port
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: hospital-booking-db
+          property: database
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: hospital-booking-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: hospital-booking-db
+          property: password
       - key: DB_POOL_SIZE
         value: "5"
       - key: DB_MIN_IDLE
