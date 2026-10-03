@@ -31,9 +31,9 @@ export default function SuperAdmin(){
  };
  const loadTab=async name=>{
   try{
-   if(name==='Subscriptions') setRows(r=>({...r,subscriptions:await request('/api/v1/platform/subscriptions')}));
-   if(name==='Platform Users') setRows(r=>({...r,users:await request('/api/v1/platform/users')}));
-   if(name==='Audit Logs') setRows(r=>({...r,audit:await request('/api/v1/platform/audit-logs')}));
+   if(name==='Subscriptions'){const d=await request('/api/v1/platform/subscriptions');setRows(r=>({...r,subscriptions:d}))}
+   if(name==='Platform Users'){const d=await request('/api/v1/platform/users');setRows(r=>({...r,users:d}))}
+   if(name==='Audit Logs'){const d=await request('/api/v1/platform/audit-logs');setRows(r=>({...r,audit:d}))}
   }catch(e){notify(e.message)}
  };
  useEffect(()=>{const a=saved();if(a)load(a)},[]);
