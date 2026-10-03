@@ -16,6 +16,8 @@ public class Tenant {
  @Column(name="tenant_domain") private String tenantDomain;
  @Column(name="admin_email") private String adminEmail;
  @Column(name="admin_user_id") private UUID adminUserId;
+ @Column(name="email_verified",nullable=false) private boolean emailVerified;
+ @Column(name="mobile_verified",nullable=false) private boolean mobileVerified;
  public UUID getId(){return id;} public String getHospitalName(){return hospitalName;} public void setHospitalName(String v){hospitalName=v;}
  public String getHospitalCode(){return hospitalCode;} public void setHospitalCode(String v){hospitalCode=v;}
  public String getEmail(){return email;} public void setEmail(String v){email=v;} public String getPhone(){return phone;} public void setPhone(String v){phone=v;}
@@ -26,4 +28,6 @@ public class Tenant {
  public String getTenantDomain(){return tenantDomain;} public void setTenantDomain(String v){tenantDomain=v;}
  public String getAdminEmail(){return adminEmail;} public void setAdminEmail(String v){adminEmail=v;}
  public UUID getAdminUserId(){return adminUserId;} public void setAdminUserId(UUID v){adminUserId=v;}
+ public boolean isEmailVerified(){return emailVerified;} public void setEmailVerified(boolean v){emailVerified=v;}
+ public boolean isMobileVerified(){return mobileVerified;} public void setMobileVerified(boolean v){mobileVerified=v;}
 }
