@@ -124,3 +124,22 @@ GitHub Pages requires the repository Pages setting to be enabled before the Page
 8. Admin scheduling UI
 9. Payments and notifications
 10. Production deployment and monitoring
+
+## Live deployment
+
+The project is configured for Render using `render.yaml`.
+
+It provisions:
+- React frontend as a Render Static Site
+- Spring Boot backend as a Docker Web Service
+- PostgreSQL database
+
+Render supports Blueprint-based deployment from a repository. Connect the repository in Render and deploy the Blueprint; the two services and database are then managed from the same configuration. Free Render web services and static sites are suitable for testing, while the free Postgres database expires after 30 days, so production data should use a paid database. citeturn3search3turn1search0
+
+[Deploy the full stack on Render](https://render.com/deploy?repo=https://github.com/aashishsharma436/HospitalBooking)
+
+For the first deployment, provide:
+- `VITE_API_BASE_URL` = the public backend URL
+- `CORS_ALLOWED_ORIGINS` = the public frontend URL
+
+These values are intentionally not committed as secrets.
