@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.oauth2.server.resource.authentication.*;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -20,6 +22,12 @@ public class SecurityConfig {
   return new InMemoryUserDetailsManager(User.withUsername(username).password(passwordEncoder().encode(password)).roles("PLATFORM_ADMIN").build());
  }
 
+ @Bean AuthenticationProvider platformAuthenticationProvider(UserDetailsService platformUsers, PasswordEncoder encoder){
+  var provider=new DaoAuthenticationProvider(platformUsers);
+  provider.setPasswordEncoder(encoder);
+  return provider;
+ }
+
  @Bean JwtAuthenticationConverter jwtAuthenticationConverter(){
   var authorities=new JwtGrantedAuthoritiesConverter();
   authorities.setAuthoritiesClaimName("authorities");
@@ -29,8 +37,9 @@ public class SecurityConfig {
   return converter;
  }
 
- @Bean org.springframework.security.web.SecurityFilterChain security(HttpSecurity http,JwtDecoder decoder,JwtAuthenticationConverter converter) throws Exception{
+ @Bean org.springframework.security.web.SecurityFilterChain security(HttpSecurity http,JwtDecoder decoder,JwtAuthenticationConverter converter,AuthenticationProvider platformAuthenticationProvider) throws Exception{
   http.csrf(csrf->csrf.disable())
+   .authenticationProvider(platformAuthenticationProvider)
    .authorizeHttpRequests(auth->auth
     .requestMatchers("/actuator/health","/api/v1/status","/api/v1/auth/login").permitAll()
     .requestMatchers("/api/v1/platform/**").hasRole("PLATFORM_ADMIN")
