@@ -2,30 +2,37 @@ package com.hospitalbooking.auth;
 
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
-import com.nimbusds.jose.jwk.*;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import javax.crypto.SecretKey;
+import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 
+@Component
 public class JwtTokenService {
- private final JwtEncoder encoder; private final JwtDecoder decoder; private final String issuer; private final long ttlSeconds;
- public JwtTokenService(String secret,String issuer,long ttlSeconds){
-  if(secret==null||secret.length()<32) throw new IllegalStateException("JWT_SECRET must be at least 32 characters");
-  this.issuer=issuer; this.ttlSeconds=ttlSeconds;
-  SecretKey key=new SecretKeySpec(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8),"HmacSHA256");
-  OctetSequenceKey jwk=new OctetSequenceKey.Builder(key.getEncoded()).algorithm(com.nimbusds.jose.JWSAlgorithm.HS256).build();
-  this.encoder=new NimbusJwtEncoder(new ImmutableJWKSet<>(new JWKSet(jwk)));
-  this.decoder=NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
+ private final JwtDecoder decoder; private final byte[] secret; private final String issuer; private final long ttlSeconds; private final ObjectMapper mapper=new ObjectMapper();
+ public JwtTokenService(org.springframework.core.env.Environment env){
+  String configured=env.getProperty("JWT_SECRET");
+  if(configured==null||configured.length()<32) throw new IllegalStateException("JWT_SECRET must be at least 32 characters");
+  secret=configured.getBytes(StandardCharsets.UTF_8); issuer=env.getProperty("JWT_ISSUER","careflow"); ttlSeconds=Long.parseLong(env.getProperty("JWT_TTL_SECONDS","28800"));
+  decoder=NimbusJwtDecoder.withSecretKey(new SecretKeySpec(secret,"HmacSHA256")).macAlgorithm(MacAlgorithm.HS256).build();
  }
  public String issue(UUID userId,String email,UUID tenantId,UUID hospitalId,String role,UUID doctorId){
-  Instant now=Instant.now();
-  JwtClaimsSet.Builder claims=JwtClaimsSet.builder().issuer(issuer).issuedAt(now).expiresAt(now.plusSeconds(ttlSeconds))
-   .subject(userId.toString()).claim("email",email).claim("tenantId",tenantId.toString()).claim("hospitalId",hospitalId.toString())
-   .claim("role",role).claim("authorities",List.of("ROLE_"+role));
-  if(doctorId!=null) claims.claim("doctorId",doctorId.toString());
-  return encoder.encode(JwtEncoderParameters.from(claims.build())).getTokenValue();
+  try{
+   Instant now=Instant.now();
+   Map<String,Object> header=Map.of("alg","HS256","typ","JWT");
+   Map<String,Object> claims=new LinkedHashMap<>();
+   claims.put("iss",issuer); claims.put("iat",now.getEpochSecond()); claims.put("exp",now.plusSeconds(ttlSeconds).getEpochSecond());
+   claims.put("sub",userId.toString()); claims.put("email",email); claims.put("tenantId",tenantId.toString()); claims.put("hospitalId",hospitalId.toString());
+   claims.put("role",role); claims.put("authorities",List.of("ROLE_"+role)); if(doctorId!=null) claims.put("doctorId",doctorId.toString());
+   String h=Base64.getUrlEncoder().withoutPadding().encodeToString(mapper.writeValueAsBytes(header));
+   String p=Base64.getUrlEncoder().withoutPadding().encodeToString(mapper.writeValueAsBytes(claims));
+   Mac mac=Mac.getInstance("HmacSHA256"); mac.init(new SecretKeySpec(secret,"HmacSHA256"));
+   String s=Base64.getUrlEncoder().withoutPadding().encodeToString(mac.doFinal((h+"."+p).getBytes(StandardCharsets.US_ASCII)));
+   return h+"."+p+"."+s;
+  }catch(Exception e){throw new IllegalStateException("Unable to issue access token",e);}
  }
  public JwtDecoder decoder(){return decoder;}
 }
