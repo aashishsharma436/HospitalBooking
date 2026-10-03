@@ -5,7 +5,7 @@ import java.time.Instant; import java.util.UUID;
 public class Tenant {
  @Id @GeneratedValue(strategy=GenerationType.UUID) private UUID id;
  @Column(name="hospital_name",nullable=false) private String hospitalName;
- @Column(name="hospital_code",nullable=false,unique=true) private String hospitalCode;
+ @Column(name="hospital_code",unique=true) private String hospitalCode;
  @Column(nullable=false) private String email;
  private String phone; private String city;
  @Enumerated(EnumType.STRING) @Column(nullable=false) private HospitalStatus status=HospitalStatus.PENDING_REVIEW;

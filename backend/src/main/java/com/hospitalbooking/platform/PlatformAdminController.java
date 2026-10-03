@@ -19,13 +19,13 @@ public class PlatformAdminController {
  }
  @PostMapping("/tenants") public Map<String,Object> onboard(@RequestBody Tenant request,Authentication auth){
   request.setStatus(HospitalStatus.PENDING_REVIEW);request.setOnboardingStatus(HospitalStatus.PENDING_REVIEW);
-  if(request.getTenantSlug()==null||request.getTenantSlug().isBlank())request.setTenantSlug(slugify(request.getHospitalCode()));
+  if(request.getTenantSlug()==null||request.getTenantSlug().isBlank())request.setTenantSlug(slugify(request.getHospitalName()));
   request.setTenantDomain(request.getTenantSlug()+".careflow.com");
   if(request.getAdminEmail()==null||request.getAdminEmail().isBlank())request.setAdminEmail("admin@"+request.getTenantDomain());
   if(request.getEmail()==null||request.getEmail().isBlank())throw new IllegalArgumentException("Verified contact email is required");
   if(request.getPhone()==null||request.getPhone().isBlank())throw new IllegalArgumentException("Mobile number is required");
   Tenant saved=tenants.save(request);
-  audit(auth,"HOSPITAL_ONBOARDING_CREATED","PLATFORM_TENANT",saved.getId(),Map.of("hospitalCode",saved.getHospitalCode()));
+  audit(auth,"HOSPITAL_ONBOARDING_CREATED","PLATFORM_TENANT",saved.getId(),Map.of("hospitalName",saved.getHospitalName()));
   try{
    Map<String,Object> state=verification.send(saved.getId());
    audit(auth,"HOSPITAL_VERIFICATION_OTP_SENT","PLATFORM_TENANT",saved.getId(),Map.of("email",saved.getEmail(),"mobile",saved.getPhone()));
@@ -48,9 +48,11 @@ public class PlatformAdminController {
   Map<String,Object> v=jdbc.queryForMap("select email_verified,mobile_verified,status from platform_tenants where id=?",id);
   if(!Boolean.TRUE.equals(v.get("email_verified"))||!Boolean.TRUE.equals(v.get("mobile_verified"))||!"VERIFIED_PENDING_REVIEW".equals(v.get("status")))
    throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Verify both email and mobile before approval");
-  Tenant t=tenants.findById(id).orElseThrow();t.setStatus(HospitalStatus.PROVISIONING);t.setOnboardingStatus(HospitalStatus.PROVISIONING);t.setApprovedAt(Instant.now());tenants.save(t);
+  Tenant t=tenants.findById(id).orElseThrow();
+  if(t.getHospitalCode()==null||t.getHospitalCode().isBlank()) t.setHospitalCode(generateHospitalCode());
+  t.setStatus(HospitalStatus.PROVISIONING);t.setOnboardingStatus(HospitalStatus.PROVISIONING);t.setApprovedAt(Instant.now());tenants.save(t);
   HospitalProvisioningService.ProvisionedAdmin admin=provisioning.provision(id);
-  audit(auth,"HOSPITAL_APPROVED","PLATFORM_TENANT",id,Map.of("adminEmail",admin.email()));
+  audit(auth,"HOSPITAL_APPROVED","PLATFORM_TENANT",id,Map.of("hospitalCode",t.getHospitalCode(),"adminEmail",admin.email()));
   return Map.of("tenant",tenants.findById(id).orElse(t),"adminEmail",admin.email(),"temporaryPassword",admin.temporaryPassword(),"message","Hospital provisioned");
  }
  @PostMapping("/tenants/{id}/reject") public Tenant reject(@PathVariable UUID id,Authentication auth){
@@ -78,6 +80,14 @@ public class PlatformAdminController {
  private void audit(Authentication auth,String action,String entityType,UUID entityId,Map<String,Object> metadata){
   String actor=auth==null?"system":auth.getName();
   jdbc.update("insert into audit_logs(action,entity_type,entity_id,metadata) values(?,?,?,?::jsonb)",action,entityType,entityId,new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(Map.of("actor",actor,"source","platform")).toString());
+ }
+ private String generateHospitalCode(){
+  for(int i=0;i<20;i++){
+   String code="CFH-"+UUID.randomUUID().toString().replace("-","").substring(0,6).toUpperCase(Locale.ROOT);
+   Long count=jdbc.queryForObject("select count(*) from platform_tenants where hospital_code=?",Long.class,code);
+   if(count!=null&&count==0)return code;
+  }
+  throw new IllegalStateException("Unable to generate a unique hospital code");
  }
  private String slugify(String v){String s=v.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+","-").replaceAll("^-+|-+$","");return s.length()>60?s.substring(0,60):s;}
 }
