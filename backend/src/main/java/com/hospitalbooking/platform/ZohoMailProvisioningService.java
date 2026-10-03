@@ -17,9 +17,9 @@ public class ZohoMailProvisioningService implements MailProvisioningService {
  private final String token;
 
  public ZohoMailProvisioningService(RestClient.Builder builder,ObjectMapper mapper,
-   @Value("\${MAIL_PROVIDER:identity-only}") String provider,
-   @Value("\${ZOHO_MAIL_ORG_ID:}") String orgId,
-   @Value("\${ZOHO_MAIL_OAUTH_TOKEN:}") String token){
+   @Value("${MAIL_PROVIDER:identity-only}") String provider,
+   @Value("${ZOHO_MAIL_ORG_ID:}") String orgId,
+   @Value("${ZOHO_MAIL_OAUTH_TOKEN:}") String token){
   this.client=builder.baseUrl("https://mail.zoho.com").build();
   this.mapper=mapper;this.provider=provider;this.orgId=orgId;this.token=token;
  }

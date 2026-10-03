@@ -32,9 +32,11 @@ function HospitalDashboard({onLogout}) {
     {name:'Dr. Vikram Shah',specialty:'General Medicine',mode:'Queue',next:'Token 18',wait:'15–20 min',available:true},
     {name:'Dr. Meera Iyer',specialty:'Dermatology',mode:'Hybrid',next:'11:15 AM',wait:'8–12 min',available:true}
   ]);
-  const [patients,setPatients]=useState([]);
-  const [patientError,setPatientError]=useState('');
-  const [modal,setModal]=useState(false),[toast,setToast]=useState(''),[search,setSearch]=useState('');
+  const [patients,setPatients]=useState([]),[team,setTeam]=useState([]);
+  const [patientError,setPatientError]=useState(''),[teamError,setTeamError]=useState('');
+  const [modal,setModal]=useState(false),[teamModal,setTeamModal]=useState(false),[toast,setToast]=useState(''),[search,setSearch]=useState('');
+  const currentUser=JSON.parse(sessionStorage.getItem('hospitalUser')||'null');
+  const isHospitalAdmin=currentUser?.role==='HOSPITAL_ADMIN';
   useEffect(()=>{
     if(active!=='Patients') return;
     const token=sessionStorage.getItem('hospitalAccessToken');
@@ -42,15 +44,23 @@ function HospitalDashboard({onLogout}) {
       .then(async r=>{if(!r.ok) throw new Error((await r.text())||'Unable to load patients');return r.json();})
       .then(setPatients).catch(e=>setPatientError(e.message));
   },[active]);
+  useEffect(()=>{
+    if(active!=='Team'||!isHospitalAdmin) return;
+    const token=sessionStorage.getItem('hospitalAccessToken');
+    fetch(API+'/api/v1/hospital/users',{headers:{Authorization:'Bearer '+token}})
+      .then(async r=>{if(!r.ok) throw new Error((await r.text())||'Unable to load team');return r.json();})
+      .then(setTeam).catch(e=>setTeamError(e.message));
+  },[active,isHospitalAdmin]);
   const notify=x=>{setToast(x);setTimeout(()=>setToast(''),2200)};
   const createAppointment=e=>{e.preventDefault();const f=new FormData(e.currentTarget);setAppointments(a=>[...a,{id:Date.now(),time:f.get('time'),patient:f.get('patient'),doctor:f.get('doctor'),service:f.get('service'),status:'Confirmed'}].sort((a,b)=>a.time.localeCompare(b.time)));setModal(false);notify('Appointment created')};
   const issueToken=()=>{setQueue(q=>({...q,next:q.next+1,waiting:q.waiting+1}));notify('Token '+queue.next+' issued')};
   const callNext=()=>{setQueue(q=>({...q,now:q.next,next:q.next+1,waiting:Math.max(0,q.waiting-1)}));notify('Token '+queue.next+' is now serving')};
-  const toggleDoctor=name=>{setDoctors(ds=>ds.map(d=>d.name===name?{...d,available:!d.available}:d));notify('Doctor availability updated')};\n  const createTeamMember=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const token=sessionStorage.getItem('hospitalAccessToken');try{const r=await fetch(API+'/api/v1/hospital/users',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({fullName:f.get('fullName'),emailPrefix:f.get('emailPrefix'),role:f.get('role'),phone:f.get('phone'),recoveryEmail:f.get('recoveryEmail')||undefined})});if(!r.ok)throw new Error((await r.text())||'Unable to create employee');const d=await r.json();setTeam(t=>[...t,{...d,fullName:f.get('fullName'),mailStatus:d.mailboxStatus}]);setTeamModal(false);notify(d.email+' created. Temporary CareFlow password: '+d.temporaryPassword)}catch(e){notify(e.message)}};
+  const toggleDoctor=name=>{setDoctors(ds=>ds.map(d=>d.name===name?{...d,available:!d.available}:d));notify('Doctor availability updated')};
+  const createTeamMember=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const token=sessionStorage.getItem('hospitalAccessToken');try{const r=await fetch(API+'/api/v1/hospital/users',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({fullName:f.get('fullName'),emailPrefix:f.get('emailPrefix'),role:f.get('role'),phone:f.get('phone'),recoveryEmail:f.get('recoveryEmail')||undefined})});if(!r.ok)throw new Error((await r.text())||'Unable to create employee');const d=await r.json();setTeam(t=>[...t,{...d,fullName:f.get('fullName'),mailStatus:d.mailboxStatus}]);setTeamModal(false);notify(d.email+' created. Temporary CareFlow password: '+d.temporaryPassword)}catch(e){notify(e.message)}};
   const filtered=appointments.filter(a=>[a.patient,a.doctor,a.service].join(' ').toLowerCase().includes(search.toLowerCase()));
   return <div className="app-shell">
     <aside className="sidebar"><div className="brand"><div className="brand-mark">C</div><div><strong>CareFlow</strong><span>Hospital Booking</span></div></div>
-      <nav>{['Overview','Appointments','Live Queue','Doctors','Patients','Team','Reports'].filter(item=>item!=='Team'||isHospitalAdmin).map((item,i)=><button key={item} className={active===item?'nav-item active':'nav-item'} onClick={()=>setActive(item)}><span>{['⌂','▣','◉','♧','♡','▥'][i]}</span>{item}</button>)}</nav>
+      <nav>{['Overview','Appointments','Live Queue','Doctors','Patients','Team','Reports'].filter(item=>item!=='Team'||isHospitalAdmin).map((item,i)=><button key={item} className={active===item?'nav-item active':'nav-item'} onClick={()=>setActive(item)}><span>{['⌂','▣','◉','♧','♡','♙','▥'][i]}</span>{item}</button>)}</nav>
       <div className="sidebar-footer"><div className="mini-avatar">AS</div><div><strong>Hospital Admin</strong><span>Current hospital</span></div><button className="text-button" onClick={onLogout}>Sign out</button></div>
     </aside>
     <main className="main"><header className="topbar"><div><span className="eyebrow">TUESDAY · 3 OCTOBER 2026</span><h1>{active==='Overview'?'Good morning, Admin':active}</h1></div><div className="top-actions"><div className="search-wrap">⌕<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..."/></div><button className="icon-button" onClick={()=>notify('No new notifications')}>♢</button><button className="profile" onClick={()=>notify('Hospital Admin')}>AS</button></div></header>
