@@ -1,0 +1,7 @@
+{
+  "name": "hospital-booking",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm ci && npm run build"
+  }
+}
