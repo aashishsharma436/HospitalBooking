@@ -10,6 +10,6 @@ import java.util.Map;
 public class AuthController {
  private final AuthService auth;
  public AuthController(AuthService auth){this.auth=auth;}
- @PostMapping("/login") public Map<String,Object> login(@Valid @RequestBody LoginRequest r){return auth.login(r.tenantId(),r.hospitalCode(),r.email(),r.password());}
- public record LoginRequest(@NotBlank String tenantId,@NotBlank String hospitalCode,@Email @NotBlank String email,@NotBlank String password){}
+ @PostMapping("/login") public Map<String,Object> login(@Valid @RequestBody LoginRequest r){return auth.login(r.hospitalCode(),r.email(),r.password());}
+ public record LoginRequest(@NotBlank String hospitalCode,@Email @NotBlank String email,@NotBlank String password){}
 }
