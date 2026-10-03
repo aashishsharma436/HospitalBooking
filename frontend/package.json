@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && mkdir -p dist/super-admin && cp dist/index.html dist/super-admin/index.html",
     "lint": "oxlint",
     "preview": "vite preview"
   },
