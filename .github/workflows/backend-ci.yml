@@ -6,18 +6,22 @@ on:
       - 'backend/**'
       - 'database/**'
       - '.github/workflows/backend-ci.yml'
+      - '.github/workflows/backend-container.yml'
   pull_request:
     paths:
       - 'backend/**'
       - 'database/**'
       - '.github/workflows/backend-ci.yml'
+      - '.github/workflows/backend-container.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
-  build-test:
-    name: Build and test backend
+  backend:
+    name: Build, test and publish backend
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -44,3 +48,30 @@ jobs:
           name: backend-test-reports
           path: backend/target/surefire-reports/
           if-no-files-found: ignore
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/backend
+          tags: |
+            type=raw,value=latest
+            type=sha
+
+      - name: Build and push backend image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
