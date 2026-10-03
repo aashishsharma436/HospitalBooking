@@ -1,6 +1,8 @@
 package com.hospitalbooking.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 @Entity
@@ -13,7 +15,7 @@ public class Patient {
     @Column(name="patient_number", nullable=false) private String patientNumber;
     @Column(name="full_name", nullable=false) private String fullName;
     private String phone;
-    private String email;
+    @JdbcTypeCode(SqlTypes.OTHER) private String email;
 
     public UUID getId(){return id;}
     public UUID getTenantId(){return tenantId;}
