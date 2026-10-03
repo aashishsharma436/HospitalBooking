@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './App.css';
+import SuperAdmin from './SuperAdmin.jsx';
 
 const doctors = [
   { name: 'Dr. Ananya Rao', specialty: 'Cardiology', mode: 'Appointment', next: '10:30 AM', wait: 'By appointment' },
@@ -15,6 +16,7 @@ const appointments = [
 ];
 
 function App() {
+  if (window.location.pathname.startsWith('/super-admin')) return <SuperAdmin />;
   const [active,setActive]=useState('Overview');
   const [appointments,setAppointments]=useState([
     {id:1,time:'10:30',patient:'Riya Menon',doctor:'Dr. Ananya Rao',service:'Cardiology',status:'Confirmed'},
