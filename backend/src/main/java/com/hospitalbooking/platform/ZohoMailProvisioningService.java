@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import java.util.Map;
 
-@Service
+@Service("zohoMailProvisioningService")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="MAIL_PROVIDER",havingValue="zoho")
 public class ZohoMailProvisioningService implements MailProvisioningService {
  private final RestClient client;
  private final ObjectMapper mapper;

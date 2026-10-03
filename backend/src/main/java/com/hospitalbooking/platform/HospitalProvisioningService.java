@@ -10,7 +10,7 @@ import java.util.*;
 @Service
 public class HospitalProvisioningService {
  private final JdbcTemplate jdbc; private final PasswordEncoder encoder; private final MailProvisioningService mail; private final SecureRandom random=new SecureRandom();
- public HospitalProvisioningService(JdbcTemplate jdbc,PasswordEncoder encoder,MailProvisioningService mail){this.jdbc=jdbc;this.encoder=encoder;this.mail=mail;}
+ public HospitalProvisioningService(JdbcTemplate jdbc,PasswordEncoder encoder,@org.springframework.beans.factory.annotation.Qualifier("noopMailProvisioningService") MailProvisioningService mail){this.jdbc=jdbc;this.encoder=encoder;this.mail=mail;}
 
  @Transactional
  public ProvisionedAdmin provision(UUID platformTenantId){
