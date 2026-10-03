@@ -1,7 +1,7 @@
 package com.hospitalbooking.platform;
 import jakarta.persistence.*;
 import java.time.Instant; import java.util.UUID;
-@Entity @Table(name="tenants")
+@Entity @Table(name="platform_tenants")
 public class Tenant {
  @Id @GeneratedValue(strategy=GenerationType.UUID) private UUID id;
  @Column(name="hospital_name",nullable=false) private String hospitalName;
