@@ -3,7 +3,7 @@ import './HospitalLogin.css';
 
 const API=(import.meta.env.VITE_API_BASE_URL||'').replace(/\/$/,'');
 
-export default function HospitalLogin({onLogin}){
+export default function HospitalLogin({onLogin,onOpenSuperAdmin}){
  const [form,setForm]=useState({hospitalCode:'',email:'',password:''});
  const [error,setError]=useState(''); const [loading,setLoading]=useState(false);
  const submit=async e=>{
@@ -28,6 +28,6 @@ export default function HospitalLogin({onLogin}){
    {error&&<div className="hospital-login-error">{error}</div>}
    <button disabled={loading}>{loading?'Signing in…':'Sign in to hospital'}</button>
   </form>
-  <a href="/super-admin">CareFlow platform owner →</a>
+  <a href="/super-admin" onClick={e=>{e.preventDefault();onOpenSuperAdmin?.();}}>CareFlow platform owner →</a>
  </div></div>;
 }
