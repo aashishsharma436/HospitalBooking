@@ -134,7 +134,7 @@ It provisions:
 - Spring Boot backend as a Docker Web Service
 - PostgreSQL database
 
-Render supports Blueprint-based deployment from a repository. Connect the repository in Render and deploy the Blueprint; the two services and database are then managed from the same configuration. Free Render web services and static sites are suitable for testing, while the free Postgres database expires after 30 days, so production data should use a paid database. citeturn3search3turn1search0
+Render supports Blueprint-based deployment from a repository. Connect the repository in Render and deploy the Blueprint; the two services and database are then managed from the same configuration. Free Render web services and static sites are suitable for testing, while the free Postgres database expires after 30 days, so production data should use a paid database.
 
 [Deploy the full stack on Render](https://render.com/deploy?repo=https://github.com/aashishsharma436/HospitalBooking)
 
