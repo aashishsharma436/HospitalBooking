@@ -1,3 +1,4 @@
+-- Platform control-plane schema for Super Admin tenant onboarding.
 CREATE TABLE IF NOT EXISTS platform_users (
  id uuid PRIMARY KEY,
  email varchar(255) NOT NULL UNIQUE,
