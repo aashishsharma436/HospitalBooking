@@ -1,6 +1,8 @@
 package com.hospitalbooking.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.*;
 import java.util.UUID;
 
@@ -18,7 +20,7 @@ public class Appointment {
     @Column(name="appointment_date", nullable=false) private LocalDate appointmentDate;
     @Column(name="appointment_start", nullable=false) private LocalTime appointmentStart;
     @Column(name="appointment_end", nullable=false) private LocalTime appointmentEnd;
-    @Enumerated(EnumType.STRING) @Column(nullable=false) private AppointmentStatus status=AppointmentStatus.CONFIRMED;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM) @Enumerated(EnumType.STRING) @Column(nullable=false) private AppointmentStatus status=AppointmentStatus.CONFIRMED;
     @Column(name="booking_source", nullable=false) private String bookingSource;
     @Column(name="checked_in_at") private Instant checkedInAt;
     @Column(name="checked_in_by") private UUID checkedInBy;
