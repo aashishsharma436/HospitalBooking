@@ -9,7 +9,7 @@ public class Tenant {
  @Column(nullable=false) private String email;
  private String phone; private String city;
  @Enumerated(EnumType.STRING) @Column(nullable=false) private HospitalStatus status=HospitalStatus.PENDING_REVIEW;
- @Column(name="onboarding_status",nullable=false) private HospitalStatus onboardingStatus=HospitalStatus.PENDING_REVIEW;
+ @Enumerated(EnumType.STRING) @Column(name="onboarding_status",nullable=false) private HospitalStatus onboardingStatus=HospitalStatus.PENDING_REVIEW;
  @Column(name="created_at",nullable=false) private Instant createdAt=Instant.now();
  @Column(name="approved_at") private Instant approvedAt;
  public UUID getId(){return id;} public String getHospitalName(){return hospitalName;} public void setHospitalName(String v){hospitalName=v;}
