@@ -10,7 +10,7 @@ import java.util.UUID;
 public class AppUser {
  @Id @GeneratedValue(strategy=GenerationType.UUID) private UUID id;
  @Column(name="tenant_id",nullable=false) private UUID tenantId;
- @Column(nullable=false) private String email;
+ @JdbcTypeCode(SqlTypes.OTHER) @Column(nullable=false) private String email;
  private String phone;
  @Column(name="password_hash") private String passwordHash;
  @Column(name="full_name",nullable=false) private String fullName;
