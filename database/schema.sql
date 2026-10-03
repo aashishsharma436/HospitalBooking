@@ -197,9 +197,18 @@ CREATE TABLE user_roles (
 );
 
 CREATE TABLE user_hospitals (
-    user_id             uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    hospital_id         uuid NOT NULL REFERENCES hospitals(id) ON DELETE CASCADE,
-    PRIMARY KEY (user_id, hospital_id)
+    tenant_id           uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    user_id             uuid NOT NULL,
+    hospital_id         uuid NOT NULL,
+    PRIMARY KEY (user_id, hospital_id),
+    CONSTRAINT fk_user_hospitals_user
+        FOREIGN KEY (tenant_id, user_id)
+        REFERENCES users(tenant_id, id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_user_hospitals_hospital
+        FOREIGN KEY (tenant_id, hospital_id)
+        REFERENCES hospitals(tenant_id, id)
+        ON DELETE CASCADE
 );
 
 -- ============================================================
@@ -634,7 +643,7 @@ CREATE TABLE audit_logs (
 
 CREATE INDEX ix_hospitals_tenant ON hospitals (tenant_id);
 CREATE INDEX ix_users_tenant_status ON users (tenant_id, status);
-CREATE INDEX ix_user_hospitals_hospital ON user_hospitals (hospital_id);
+CREATE INDEX ix_user_hospitals_tenant_hospital ON user_hospitals (tenant_id, hospital_id);
 
 CREATE INDEX ix_doctors_tenant_hospital ON doctors (tenant_id, hospital_id);
 CREATE INDEX ix_doctors_department ON doctors (department_id);
