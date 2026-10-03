@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import SuperAdmin from './SuperAdmin.jsx';
 import HospitalLogin from './HospitalLogin.jsx';
+
+const API=(import.meta.env.VITE_API_BASE_URL||'https://hospital-booking-backend-tv9o.onrender.com').replace(/\/$/,'');
 
 const doctors = [
   { name: 'Dr. Ananya Rao', specialty: 'Cardiology', mode: 'Appointment', next: '10:30 AM', wait: 'By appointment' },
@@ -30,7 +32,16 @@ function HospitalDashboard({onLogout}) {
     {name:'Dr. Vikram Shah',specialty:'General Medicine',mode:'Queue',next:'Token 18',wait:'15–20 min',available:true},
     {name:'Dr. Meera Iyer',specialty:'Dermatology',mode:'Hybrid',next:'11:15 AM',wait:'8–12 min',available:true}
   ]);
+  const [patients,setPatients]=useState([]);
+  const [patientError,setPatientError]=useState('');
   const [modal,setModal]=useState(false),[toast,setToast]=useState(''),[search,setSearch]=useState('');
+  useEffect(()=>{
+    if(active!=='Patients') return;
+    const token=sessionStorage.getItem('hospitalAccessToken');
+    fetch(API+'/api/v1/patients',{headers:{Authorization:'Bearer '+token}})
+      .then(async r=>{if(!r.ok) throw new Error((await r.text())||'Unable to load patients');return r.json();})
+      .then(setPatients).catch(e=>setPatientError(e.message));
+  },[active]);
   const notify=x=>{setToast(x);setTimeout(()=>setToast(''),2200)};
   const createAppointment=e=>{e.preventDefault();const f=new FormData(e.currentTarget);setAppointments(a=>[...a,{id:Date.now(),time:f.get('time'),patient:f.get('patient'),doctor:f.get('doctor'),service:f.get('service'),status:'Confirmed'}].sort((a,b)=>a.time.localeCompare(b.time)));setModal(false);notify('Appointment created')};
   const issueToken=()=>{setQueue(q=>({...q,next:q.next+1,waiting:q.waiting+1}));notify('Token '+queue.next+' issued')};
@@ -49,7 +60,7 @@ function HospitalDashboard({onLogout}) {
       {active==='Appointments'&&<section className="page-stack"><Toolbar title="Appointments" onAction={()=>setModal(true)} action="+ New appointment"/><AppointmentPanel appointments={filtered} full/></section>}
       {active==='Live Queue'&&<section className="page-stack"><Toolbar title="Live Queue" onAction={issueToken} action="+ Walk-in token"/><QueuePanel queue={queue} onIssue={issueToken} onCall={callNext} large/></section>}
       {active==='Doctors'&&<section className="page-stack"><Toolbar title="Doctors"/><DoctorPanel doctors={doctors} onToggle={toggleDoctor} full/></section>}
-      {active==='Patients'&&<section className="page-stack"><Toolbar title="Patients"/><div className="panel"><div className="patient-list">{['Riya Menon','Rahul Verma','Priya Nair','Arjun Kumar'].filter(n=>n.toLowerCase().includes(search.toLowerCase())).map(n=><div className="patient-row" key={n}><div className="patient-avatar">{n.split(' ').map(x=>x[0]).join('')}</div><strong>{n}</strong><span>Today</span><button className="text-button" onClick={()=>notify('Patient profile opened')}>View →</button></div>)}</div></div></section>}
+      {active==='Patients'&&<section className="page-stack"><Toolbar title="Patients"/><div className="panel"><div className="patient-list">{patientError&&<div className="patient-row"><strong>{patientError}</strong></div>}{patients.filter(p=>(p.fullName||'').toLowerCase().includes(search.toLowerCase())).map(p=><div className="patient-row" key={p.id}><div className="patient-avatar">{(p.fullName||'P').split(' ').map(x=>x[0]).join('')}</div><strong>{p.fullName}</strong><span>{p.patientNumber}</span><button className="text-button" onClick={()=>notify('Patient profile opened')}>View →</button></div>)}{!patientError&&!patients.length&&<div className="patient-row"><span>No patients available for your role.</span></div>}</div></div></section>}
       {active==='Reports'&&<section className="page-stack"><Toolbar title="Reports"/><div className="stats-grid"><Stat label="Appointments" value={appointments.length} delta="Today" tone="teal"/><Stat label="Queue served" value="31" delta="Today" tone="blue"/><Stat label="No-shows" value="3" delta="6.2%" tone="amber"/><Stat label="Avg. wait" value="18 min" delta="Today" tone="green"/></div></section>}
       {toast&&<div className="toast">{toast}</div>}
     </main>
