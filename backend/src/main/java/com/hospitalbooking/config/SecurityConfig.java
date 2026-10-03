@@ -12,6 +12,10 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.oauth2.server.resource.authentication.*;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -28,6 +32,17 @@ public class SecurityConfig {
   return provider;
  }
 
+ @Bean CorsConfigurationSource corsConfigurationSource(){
+  var config=new CorsConfiguration();
+  config.setAllowedOrigins(List.of("https://hospital-booking-frontend-nq7l.onrender.com"));
+  config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+  config.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","Origin"));
+  config.setMaxAge(3600L);
+  var source=new UrlBasedCorsConfigurationSource();
+  source.registerCorsConfiguration("/**",config);
+  return source;
+ }
+
  @Bean JwtAuthenticationConverter jwtAuthenticationConverter(){
   var authorities=new JwtGrantedAuthoritiesConverter();
   authorities.setAuthoritiesClaimName("authorities");
@@ -39,8 +54,10 @@ public class SecurityConfig {
 
  @Bean org.springframework.security.web.SecurityFilterChain security(HttpSecurity http,JwtDecoder decoder,JwtAuthenticationConverter converter,AuthenticationProvider platformAuthenticationProvider) throws Exception{
   http.csrf(csrf->csrf.disable())
+   .cors(Customizer.withDefaults())
    .authenticationProvider(platformAuthenticationProvider)
    .authorizeHttpRequests(auth->auth
+    .requestMatchers(org.springframework.http.HttpMethod.OPTIONS,"/**").permitAll()
     .requestMatchers("/actuator/health","/api/v1/status","/api/v1/auth/login").permitAll()
     .requestMatchers("/api/v1/platform/**").hasRole("PLATFORM_ADMIN")
     .requestMatchers("/api/v1/patients/**").hasAnyRole("HOSPITAL_ADMIN","RECEPTIONIST","DOCTOR")
