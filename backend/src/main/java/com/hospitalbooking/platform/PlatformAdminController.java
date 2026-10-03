@@ -17,9 +17,19 @@ public class PlatformAdminController {
   Map<String,Object> m=new LinkedHashMap<>();m.put("total",tenants.count());m.put("pending",tenants.countByStatus(HospitalStatus.PENDING_REVIEW));m.put("verifiedPendingReview",countStatus("VERIFIED_PENDING_REVIEW"));
   m.put("active",tenants.countByStatus(HospitalStatus.ACTIVE));m.put("trial",tenants.countByStatus(HospitalStatus.TRIAL));m.put("suspended",tenants.countByStatus(HospitalStatus.SUSPENDED));return m;
  }
+ @GetMapping("/tenants/slug-availability") public Map<String,Object> slugAvailability(@RequestParam String slug){
+  String normalized=slugify(slug);
+  if(normalized.isBlank()) throw new IllegalArgumentException("CareFlow domain prefix is required");
+  long count=Optional.ofNullable(jdbc.queryForObject("select count(*) from platform_tenants where lower(tenant_slug)=lower(?)",Long.class,normalized)).orElse(0L);
+  return Map.of("slug",normalized,"domain",normalized+".careflow.com","available",count==0);
+ }
  @PostMapping("/tenants") public Map<String,Object> onboard(@RequestBody Tenant request,Authentication auth){
   request.setStatus(HospitalStatus.PENDING_REVIEW);request.setOnboardingStatus(HospitalStatus.PENDING_REVIEW);
-  if(request.getTenantSlug()==null||request.getTenantSlug().isBlank())request.setTenantSlug(uniqueTenantSlug(request.getHospitalName()));
+  if(request.getTenantSlug()==null||request.getTenantSlug().isBlank())throw new IllegalArgumentException("CareFlow domain prefix is required");
+  request.setTenantSlug(slugify(request.getTenantSlug()));
+  Long existingSlug=jdbc.queryForObject("select count(*) from platform_tenants where lower(tenant_slug)=lower(?)",Long.class,request.getTenantSlug());
+  if(existingSlug!=null&&existingSlug>0)
+   throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"CareFlow domain \""+request.getTenantSlug()+".careflow.com\" already exists. Please choose another domain prefix.");
   request.setTenantDomain(request.getTenantSlug()+".careflow.com");
   if(request.getAdminEmail()==null||request.getAdminEmail().isBlank())request.setAdminEmail("admin@"+request.getTenantDomain());
   if(request.getEmail()==null||request.getEmail().isBlank())throw new IllegalArgumentException("Verified contact email is required");
