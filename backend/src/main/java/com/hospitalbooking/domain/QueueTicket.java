@@ -1,6 +1,8 @@
 package com.hospitalbooking.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.*;
 import java.util.UUID;
 
@@ -15,8 +17,8 @@ public class QueueTicket {
     @Column(name="appointment_id") private UUID appointmentId;
     @Column(name="queue_date",nullable=false) private LocalDate queueDate;
     @Column(name="token_number",nullable=false) private int tokenNumber;
-    @Enumerated(EnumType.STRING) @Column(nullable=false) private QueueTicketSource source;
-    @Enumerated(EnumType.STRING) @Column(nullable=false) private QueueStatus status=QueueStatus.WAITING;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM) @Enumerated(EnumType.STRING) @Column(nullable=false) private QueueTicketSource source;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM) @Enumerated(EnumType.STRING) @Column(nullable=false) private QueueStatus status=QueueStatus.WAITING;
     @Column(name="called_at") private Instant calledAt;
     @Column(name="served_at") private Instant servedAt;
 
