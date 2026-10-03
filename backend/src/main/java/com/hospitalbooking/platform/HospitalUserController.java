@@ -16,6 +16,17 @@ public class HospitalUserController {
  private final JdbcTemplate jdbc; private final PasswordEncoder encoder; private final MailProvisioningService mail; private final SecureRandom random=new SecureRandom();
  public HospitalUserController(JdbcTemplate jdbc,PasswordEncoder encoder,MailProvisioningService mail){this.jdbc=jdbc;this.encoder=encoder;this.mail=mail;}
 
+ @GetMapping("/username-availability")
+ public Map<String,Object> usernameAvailability(Authentication auth,@RequestParam String username){
+  UUID tenantId=TenantAccess.tenantId(auth);
+  String prefix=normalizeUsername(username);
+  String domain=jdbc.queryForObject("select tenant_domain from tenants where id=?",String.class,tenantId);
+  if(domain==null||domain.isBlank()) throw new IllegalStateException("Hospital email domain is not configured");
+  String email=prefix+"@"+domain;
+  boolean available=jdbc.queryForObject("select count(*) from users where tenant_id=? and email=?::citext",Long.class,tenantId,email)==0;
+  return Map.of("available",available,"username",prefix,"email",email);
+ }
+
  @GetMapping public List<Map<String,Object>> list(Authentication auth){
   UUID tenantId=TenantAccess.tenantId(auth),hospitalId=TenantAccess.hospitalId(auth);
   return jdbc.queryForList("select u.id,u.full_name as \"fullName\",u.email::text as email,u.phone,r.name as role,u.status::text as status,coalesce(ea.status,'PENDING') as \"mailStatus\" from users u join user_hospitals uh on uh.user_id=u.id and uh.tenant_id=u.tenant_id join user_roles ur on ur.user_id=u.id join roles r on r.id=ur.role_id left join email_accounts ea on ea.user_id=u.id where u.tenant_id=? and uh.hospital_id=? order by u.full_name",tenantId,hospitalId);
@@ -23,12 +34,11 @@ public class HospitalUserController {
 
  @PostMapping public Map<String,Object> create(Authentication auth,@Valid @RequestBody CreateUserRequest req){
   UUID tenantId=TenantAccess.tenantId(auth),hospitalId=TenantAccess.hospitalId(auth);
-  String prefix=req.emailPrefix().trim().toLowerCase(Locale.ROOT);
-  if(!prefix.matches("[a-z0-9][a-z0-9._-]{1,63}")) throw new IllegalArgumentException("Email prefix must contain 2-64 lowercase letters, numbers, dot, underscore or hyphen");
+  String prefix=normalizeUsername(req.emailPrefix());
   String domain=jdbc.queryForObject("select tenant_domain from tenants where id=?",String.class,tenantId);
   if(domain==null||domain.isBlank()) throw new IllegalStateException("Hospital email domain is not configured");
   String email=prefix+"@"+domain;
-  if(jdbc.queryForObject("select count(*) from users where tenant_id=? and email=?::citext",Long.class,tenantId,email)>0) throw new IllegalArgumentException("That email prefix is already in use");
+  if(jdbc.queryForObject("select count(*) from users where tenant_id=? and email=?::citext",Long.class,tenantId,email)>0) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"That username is already in use");
   if(!Set.of("RECEPTIONIST","DOCTOR","HOSPITAL_ADMIN").contains(req.role())) throw new IllegalArgumentException("Unsupported hospital role");
 
   UUID userId=UUID.randomUUID(); String appPassword=temporaryPassword(),mailPassword=temporaryPassword();
@@ -43,6 +53,11 @@ public class HospitalUserController {
   return Map.of("id",userId,"email",email,"role",req.role(),"status","INVITED","temporaryPassword",appPassword,"mailboxStatus",mailbox.status());
  }
 
+ private String normalizeUsername(String username){
+  String prefix=username==null?"":username.trim().toLowerCase(Locale.ROOT);
+  if(!prefix.matches("[a-z0-9][a-z0-9._-]{1,63}")) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"Username must contain 2-64 lowercase letters, numbers, dot, underscore or hyphen");
+  return prefix;
+ }
  private String firstName(String name){String[] p=name.trim().split("\\s+");return p[0];}
  private String lastName(String name){String[] p=name.trim().split("\\s+");return p.length>1?p[p.length-1]:"";}
  private String temporaryPassword(){String chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";StringBuilder s=new StringBuilder(18);for(int i=0;i<18;i++)s.append(chars.charAt(random.nextInt(chars.length())));return s.toString();}

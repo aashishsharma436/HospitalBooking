@@ -12,10 +12,18 @@ public class Tenant {
  @Enumerated(EnumType.STRING) @Column(name="onboarding_status",nullable=false) private HospitalStatus onboardingStatus=HospitalStatus.PENDING_REVIEW;
  @Column(name="created_at",nullable=false) private Instant createdAt=Instant.now();
  @Column(name="approved_at") private Instant approvedAt;
+ @Column(name="tenant_slug") private String tenantSlug;
+ @Column(name="tenant_domain") private String tenantDomain;
+ @Column(name="admin_email") private String adminEmail;
+ @Column(name="admin_user_id") private UUID adminUserId;
  public UUID getId(){return id;} public String getHospitalName(){return hospitalName;} public void setHospitalName(String v){hospitalName=v;}
  public String getHospitalCode(){return hospitalCode;} public void setHospitalCode(String v){hospitalCode=v;}
  public String getEmail(){return email;} public void setEmail(String v){email=v;} public String getPhone(){return phone;} public void setPhone(String v){phone=v;}
  public String getCity(){return city;} public void setCity(String v){city=v;} public HospitalStatus getStatus(){return status;} public void setStatus(HospitalStatus v){status=v;}
  public HospitalStatus getOnboardingStatus(){return onboardingStatus;} public void setOnboardingStatus(HospitalStatus v){onboardingStatus=v;}
  public Instant getCreatedAt(){return createdAt;} public Instant getApprovedAt(){return approvedAt;} public void setApprovedAt(Instant v){approvedAt=v;}
+ public String getTenantSlug(){return tenantSlug;} public void setTenantSlug(String v){tenantSlug=v;}
+ public String getTenantDomain(){return tenantDomain;} public void setTenantDomain(String v){tenantDomain=v;}
+ public String getAdminEmail(){return adminEmail;} public void setAdminEmail(String v){adminEmail=v;}
+ public UUID getAdminUserId(){return adminUserId;} public void setAdminUserId(UUID v){adminUserId=v;}
 }
