@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './App.css';
 import SuperAdmin from './SuperAdmin.jsx';
+import HospitalLogin from './HospitalLogin.jsx';
 
 const doctors = [
   { name: 'Dr. Ananya Rao', specialty: 'Cardiology', mode: 'Appointment', next: '10:30 AM', wait: 'By appointment' },
@@ -15,8 +16,7 @@ const appointments = [
   ['11:15', 'Arjun Kumar', 'Dr. Meera Iyer', 'Dermatology', 'Confirmed']
 ];
 
-function App() {
-  if (window.location.pathname.startsWith('/super-admin')) return <SuperAdmin />;
+function HospitalDashboard({onLogout}) {
   const [active,setActive]=useState('Overview');
   const [appointments,setAppointments]=useState([
     {id:1,time:'10:30',patient:'Riya Menon',doctor:'Dr. Ananya Rao',service:'Cardiology',status:'Confirmed'},
@@ -40,7 +40,7 @@ function App() {
   return <div className="app-shell">
     <aside className="sidebar"><div className="brand"><div className="brand-mark">C</div><div><strong>CareFlow</strong><span>Hospital Booking</span></div></div>
       <nav>{['Overview','Appointments','Live Queue','Doctors','Patients','Reports'].map((item,i)=><button key={item} className={active===item?'nav-item active':'nav-item'} onClick={()=>setActive(item)}><span>{['⌂','▣','◉','♧','♡','▥'][i]}</span>{item}</button>)}</nav>
-      <div className="sidebar-footer"><div className="mini-avatar">AS</div><div><strong>Hospital Admin</strong><span>CityCare Hospital</span></div></div>
+      <div className="sidebar-footer"><div className="mini-avatar">AS</div><div><strong>Hospital Admin</strong><span>Current hospital</span></div><button className="text-button" onClick={onLogout}>Sign out</button></div>
     </aside>
     <main className="main"><header className="topbar"><div><span className="eyebrow">TUESDAY · 3 OCTOBER 2026</span><h1>{active==='Overview'?'Good morning, Admin':active}</h1></div><div className="top-actions"><div className="search-wrap">⌕<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..."/></div><button className="icon-button" onClick={()=>notify('No new notifications')}>♢</button><button className="profile" onClick={()=>notify('Hospital Admin')}>AS</button></div></header>
       {active==='Overview'&&<><section className="hero"><div><span className="eyebrow">TODAY AT CITYCARE</span><h2>Keep every patient moving.</h2><p>Appointments, walk-ins and live queue management in one workflow.</p></div><button className="primary-button" onClick={()=>setModal(true)}>+ New appointment</button></section>
@@ -63,6 +63,13 @@ function QueuePanel({queue,onIssue,onCall,large}){return <div className={'panel 
 function AppointmentPanel({appointments,full}){return <section className={'panel appointments-panel'+(full?' full-panel':'')}><div className="panel-header"><div><span className="eyebrow">UPCOMING</span><h3>Next appointments</h3></div></div><div className="appointment-table">{appointments.map(a=><div className="appointment-row" key={a.id}><strong>{a.time}</strong><span>{a.patient}</span><span>{a.doctor}</span><span>{a.service}</span><span className={'status '+a.status.toLowerCase().replace(' ','-')}>{a.status}</span></div>)}</div></section>}
 function Stat({ label, value, delta, tone }) {
   return <div className={'stat-card ' + tone}><span>{label}</span><strong>{value}</strong><small>{delta}</small></div>;
+}
+
+function App(){
+ const [authenticated,setAuthenticated]=useState(()=>!!sessionStorage.getItem('hospitalAccessToken'));
+ if(window.location.pathname.startsWith('/super-admin')) return <SuperAdmin />;
+ if(!authenticated) return <HospitalLogin onLogin={()=>setAuthenticated(true)} />;
+ return <HospitalDashboard onLogout={()=>{sessionStorage.removeItem('hospitalAccessToken');sessionStorage.removeItem('hospitalUser');setAuthenticated(false);}} />;
 }
 
 export default App;
