@@ -1,6 +1,8 @@
 package com.hospitalbooking.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 @Entity
@@ -11,7 +13,7 @@ public class DoctorPractice {
     @Column(name="tenant_id", nullable=false) private UUID tenantId;
     @Column(name="hospital_id", nullable=false) private UUID hospitalId;
     @Column(name="doctor_id", nullable=false) private UUID doctorId;
-    @Enumerated(EnumType.STRING) @Column(name="consultation_mode", nullable=false) private ConsultationMode consultationMode = ConsultationMode.APPOINTMENT;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM) @Enumerated(EnumType.STRING) @Column(name="consultation_mode", nullable=false) private ConsultationMode consultationMode = ConsultationMode.APPOINTMENT;
     @Column(name="queue_enabled", nullable=false) private boolean queueEnabled;
     @Column(name="online_booking_enabled", nullable=false) private boolean onlineBookingEnabled = true;
 
